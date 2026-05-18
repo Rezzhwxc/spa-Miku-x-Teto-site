@@ -348,7 +348,7 @@ function playSongById(songId, autoPlay = true) {
                     // Показываем сообщение пользователю
                     if (playerElements.title) {
                         const originalTitle = playerElements.title.textContent;
-                        playerElements.title.textContent = '🔊 Нажмите на страницу для воспроизведения';
+                        playerElements.title.textContent = 'кликните для воспроизведения';
                         setTimeout(() => {
                             if (playerElements.title) playerElements.title.textContent = originalTitle;
                         }, 2000);
