@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Always-loaded CSS -->
+    <link rel="stylesheet" href="/static/css/all.css">
+    <link rel="stylesheet" href="/static/css/player.css">
+
+    <link rel="preload" href="/static/css/index.css" as="style">
+    <link rel="preload" href="/static/css/tracks.css" as="style">
+    <link rel="preload" href="/static/css/bio.css" as="style">
+    <link rel="preload" href="/static/css/bio-miku.css" as="style">
+    <link rel="preload" href="/static/css/bio-teto.css" as="style">
+
+    <!-- Page-specific CSS slot (swapped by router) -->
+    <link id="page-css" rel="stylesheet" href="/static/css/index.css">
+
+    <link rel="icon" href="/static/favicon/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png">
+
+    <title id="page-title">Miku x Teto</title>
+
+    <style>
+        /* Page-transition fade */
+        #app-view {
+            transition: opacity 0.1s ease;
+        }
+        #app-view.fading {
+            opacity: 0;
+        }
+
+        /* Loading bar */
+        #spa-loader {
+            position: fixed;
+            top: 0; left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, #10dfd8, #de1717);
+            z-index: 99999;
+            transition: width 0.25s ease, opacity 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+        #spa-loader.active {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Loading bar -->
+<div id="spa-loader"></div>
+
+<!-- ═══════════════════ PERSISTENT SIDEBAR ═══════════════════ -->
+<aside class="sidebar" id="sidebarPanel">
+
+    <button id="sidebarToggle" type="button" aria-label="Свернуть сайдбар">
+        <span class="strelka"></span>
+    </button>
+
+    <img id="click" src="/static/img/logomt.jpg" class="zagol">
+    <img id="zag-collaps" src="/static/img/zag-collaps.png">
+
+    <div class="navig">
+        <div class="link-group" data-gif-duration="2000">
+            <div class="icon-container">
+                <img src="/static/img/bring-to-front.png" class="static-icon" alt="глав">
+                <a href="/index">
+                    <img src="/static/img/bring-to-front.gif" class="gif-icon" title="Главная" alt="Анимация">
+                </a>
+            </div>
+            <a href="/index" class="text-link spa-link">Главная</a>
+        </div>
+    </div>
+
+    <div class="navig">
+        <div class="link-group" data-gif-duration="2000">
+            <div class="icon-container">
+                <img src="/static/img/music-note.png" class="static-icon" alt="Нота">
+                <a href="/tracks">
+                    <img src="/static/img/music-note.gif" class="gif-icon" title="Треки" alt="Анимация">
+                </a>
+            </div>
+            <a href="/tracks" class="text-link spa-link">Треки</a>
+        </div>
+    </div>
+
+    <div class="navig">
+        <div class="link-group" data-gif-duration="2000">
+            <div class="icon-container">
+                <img src="/static/img/quote.png" class="static-icon" alt="био">
+                <a href="/bio">
+                    <img src="/static/img/quote.gif" class="gif-icon" title="Биография" alt="Анимация">
+                </a>
+            </div>
+            <a href="/bio" class="text-link spa-link">Биография</a>
+        </div>
+    </div>
+
+    <div class="navig navig-sozd">
+        <div class="link-group" data-gif-duration="2000">
+            <div class="icon-container">
+                <img src="/static/img/artist.png" class="static-icon" alt="sozd">
+                <a href="#">
+                    <img src="/static/img/artist.gif" class="gif-icon" title="Разработчики" alt="Анимация">
+                </a>
+            </div>
+            <a href="#" class="text-link">Разработчики</a>
+        </div>
+    </div>
+
+</aside>
+
+<!-- ═══════════════════ PROFILE BUTTON ═══════════════════ -->
+<div class="profil">
+    <button class="but-prof" id="regjs">
+        <img class="reg" src="/static/img/add-user (1).png">Регистрация
+    </button>
+</div>
+
+<!-- ═══════════════════ PAGE CONTENT AREA ═══════════════════ -->
+<div id="app-view">
+    <!-- Content injected here by the SPA router -->
+</div>
+
+<!-- ═══════════════════ PERSISTENT PLAYER ═══════════════════ -->
+<div id="nowPlayingBar" class="custom-player" style="display: none;">
+    <div class="player-container">
+        <div class="player-cover">
+            <img id="playerCover" src="/static/img/load.gif" alt="Cover">
+        </div>
+        <div class="player-info">
+            <div class="player-title" id="currentSongTitle">—</div>
+            <div class="player-artist" id="currentArtist">Vocaloid</div>
+        </div>
+        <div class="player-controls">
+            <button id="prevBtn" class="player-btn" title="Предыдущий">
+                <img src="/static/img/component 1 (1).png" alt="Prev" onerror="this.src='/static/img/load.gif'">
+            </button>
+            <button id="playPauseBtn" class="player-btn play-btn" title="Play/Pause">
+                <img id="playPausePlayerImg" src="/static/img/Polygon 3 (1).png" alt="Play">
+            </button>
+            <button id="nextBtn" class="player-btn" title="Следующий">
+                <img src="/static/img/component 1 (2).png" alt="Next" onerror="this.src='/static/img/load.gif'">
+            </button>
+        </div>
+        <div class="player-progress">
+            <span class="time-current" id="currentTime">0:00</span>
+            <div class="progress-bar-container">
+                <input type="range" id="progressBar" class="progress-slider" value="0" step="0.01">
+                <div class="progress-bg"></div>
+            </div>
+            <span class="time-duration" id="duration">0:00</span>
+        </div>
+        <div class="player-volume">
+            <button id="volumeBtn" class="volume-btn">
+                <img src="/static/img/volume-up.png" alt="Volume" onerror="this.src='/static/img/load.gif'">
+            </button>
+            <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.7">
+        </div>
+        <button id="repeatModeBtn" class="player-btn repeat-mode-btn" title="Режим воспроизведения">
+            <img id="repeatModeImg" src="/static/img/repeat.png" alt="Repeat|Повтор" style="opacity: 0.5;">
+        </button>
+    </div>
+</div>
+
+<!-- Persistent audio element — never removed from DOM, keeps playing through navigation -->
+<audio id="globalAudioPlayer" style="display: none;"></audio>
+
+<!-- ═══════════════════ PERSISTENT AUTH MODALS ═══════════════════ -->
+<div id="login-overlay" style="display: none;">
+    <img src="/static/img/stars.png" class="modal1star">
+    <img src="/static/img/Ellipse1.png" class="elips">
+    <img src="/static/img/Ellipse2.png" class="elips1">
+    <div class="modal">
+        <h2>Вход в аккаунт</h2>
+        <form id="login-form">
+            <input type="email" name="email" placeholder="Email" required />
+            <input type="password" name="password" placeholder="Пароль" required minlength="6" />
+            <button type="submit">Войти</button>
+        </form>
+        <button type="button" id="open-register">Регистрация</button>
+    </div>
+</div>
+
+<div id="register-overlay" style="display: none;">
+    <img src="/static/img/stars.png" class="modal2star">
+    <img src="/static/img/Ellipse1.png" class="elips">
+    <img src="/static/img/Ellipse2.png" class="elips1">
+    <div class="modal">
+        <h2>Регистрация</h2>
+        <form id="register-form">
+            <input type="email" name="email" placeholder="Email" required />
+            <input type="password" name="password" placeholder="Пароль" required minlength="6" />
+            <input type="password" name="confirm-password" placeholder="Подтверждение пароля" required />
+            <button type="submit">Подтвердить</button>
+        </form>
+        <button type="button" id="back-to-login">Уже есть аккаунт?<br> Войти</button>
+    </div>
+</div>
+
+<!-- ═══════════════════ SCRIPTS ═══════════════════ -->
+<!-- Always-on scripts loaded once -->
+<script src="/static/js/registr.js"></script>
+<script src="/static/js/player.js"></script>
+<script src="/static/js/index.js"></script>
+
+<!-- SPA Router — loaded last so it can reference player globals -->
+<script src="/static/js/spa.js"></script>
+
+</body>
+</html>

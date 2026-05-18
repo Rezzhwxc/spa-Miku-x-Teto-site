@@ -1,0 +1,90 @@
+*{
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+
+/* декор */
+.star2{background: none; color: rgb(52, 52, 52); user-select: none;
+position: absolute; right: 7%; font-size: 150px; top: 4%;}
+.star3{background: none; color: rgb(52, 52, 52); user-select: none;
+position: absolute; right: 12%; font-size: 150px; top: 23%;}
+.star4{background: none; color: rgb(52, 52, 52); user-select: none;
+position: absolute; right: 5%; font-size: 150px; top: 39%;}
+.star5{background: none; color: rgb(52, 52, 52); user-select: none;
+position: absolute; right: 10%; font-size: 150px; top: 57%;}
+.star6{background: none; color: rgb(52, 52, 52); user-select: none;
+position: absolute; right: 3%; font-size: 150px; top: 75%;}
+
+
+img{
+    -webkit-user-drag: none; user-select: none;
+}
+a{
+    text-decoration: none;
+}
+.name a{
+    color: rgb(22, 185, 185);
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-weight: 600;
+}
+.name1 a{
+    color: rgba(221, 34, 34, 0.685);
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-weight: 600;
+}
+
+#miku, #teto{
+    display: flex;
+    transition: all 0.3s ease;
+    width: auto;
+    padding: 4px; margin-right: 300px;
+}
+.text1, .text2{
+    margin: 5px;
+    width: 75%;
+}
+
+#miku img{
+    height: auto;
+    flex-shrink: 0; margin: 15px; margin-right: 110px;
+    border: 4px solid rgb(22, 185, 185); border-radius: 30px; 
+    transition: all 0.3s ease;
+}
+#miku img:hover{scale: 1.03;
+    box-shadow: 2px 2px 6px rgb(0, 255, 234), 
+    -2px -2px 6px rgb(0, 255, 234);}
+
+.name{font-size: 35px; justify-self: flex-start;
+    transition: all 0.25s; margin-bottom: 6px; margin-left: 25px;}
+.name:hover{scale: 1.07; color: rgb(24, 224, 208);}
+
+.bio, .bio1{color: rgba(255, 255, 255, 0.649); width: auto; text-align: justify;
+    font-size: 18px; line-height: 1.4; text-indent: 1.7em;
+    transition: all 0.3s ease;
+font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+font-weight: 500;}
+
+
+.podrobnee{user-select: none; margin-left: 30px;
+    color: rgba(129, 129, 129, 0.281); 
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+
+#teto img{
+    flex-shrink: 0; margin: 15px; margin-right: 120px;
+    height: 339px; border: 4px solid rgba(202, 25, 25, 0.685); border-radius: 30px;
+    transition: all 0.3s ease;
+}
+#teto img:hover{scale: 1.03; 
+    box-shadow: 2px 2px 6px rgba(235, 17, 17, 0.76), 
+    -2px -2px 6px rgba(235, 17, 17, 0.753);}
+
+
+.name1{font-size: 35px; justify-self: flex-start;
+    transition: all 0.25s; margin-bottom: 7px; margin-left: 26px;}
+.name1:hover{scale: 1.07; color: rgba(248, 18, 18, 0.76);}

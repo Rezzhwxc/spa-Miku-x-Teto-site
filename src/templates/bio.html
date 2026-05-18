@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/bio.css">
+    <link rel="stylesheet" href="/static/css/all.css">
+    <link rel="stylesheet" href="/static/css/player.css">
+
+    <link rel="icon" href="/static/favicon/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png">
+
+    <title>Miku x Teto - биография</title>
+</head>
+<body>
+    
+
+<div class="scroll-box">
+    <div class="content">
+    
+<!-- декор справа -->
+<div id="elem">
+    <span class="star2">★</span>
+    <span class="star3">★</span>
+    <span class="star4">★</span>
+    <span class="star5">★</span>
+    <span class="star6">★</span>
+</div>
+
+    <div id="miku">
+        <a href="/bio-miku">
+            <img src="/static/img/mikugun.gif" alt="Биография Мику!">
+        </a>
+
+    <div class="text1">
+        <p class="name"><a href="/bio-miku">Hatsune miku</a></p>
+        
+        <div class="bio">
+            <p>Хацунэ Мику (初音ミク) — самая известная виртуальная певица, созданная компанией Crypton Future Media.<br>
+            Впервые была представлена 31 августа 2007 года. Её имя переводится как "Первое звучание будущего", а образ представляет собой 16-летнюю девушку с длинными бирюзовыми волосами, собранными в характерные двойные хвосты.</p>
+            
+            <p>Будучи не просто программным обеспечением, а полноценной виртуальной знаменитостью, Мику выступает с "живыми" концертами в формате голограмм, выпускает альбомы и сотрудничает с тысячами композиторов по всему миру. Её хиты вроде "World is Mine" и "Senbonzakura" стали вирусными, а сама она превратилась в символ японской поп-культуры и икону креативного сообщества, вдохновляющую музыкантов, художников и фанатов по всему земному шару.</p>
+        </div>
+    </div>
+    </div>
+
+<div class="podrobnee">★ более подробно можете ознакомиться перейдя по гиф</div>
+
+
+    <div id="teto">
+        <a href="/bio-teto">
+            <img src="/static/img/tetoris.gif" alt="Биография Тето!">
+        </a>
+
+    <div class="text2">
+
+        <p class="name1"><a href="/bio-teto">Kasane Teto</a></p>
+
+        <div class="bio1">
+        <p>Касане Тето (重音 テト) — виртуальная певица, первоначально созданная как неофициальный персонаж для программы UTAU, но со временем получившая официальное признание.<br>
+        Её разработал японский художник и композитор Твам (TAMA) в 2008 году как "мошенническую версию Хацунэ Мику", но благодаря популярности среди фанатов она стала самостоятельным персонажем.</p>
+        <p>Образ Тето включает ярко-розовые волосы, красные глаза и часто изображается в чёрно-розовой одежде. Хотя изначально она не была официальным продуктом Crypton Future Media, её популярность привела к тому, что она стала признанной виртуальной исполнительницей, появляясь в различных ритм-играх и сотрудничая с другими вокалоидами.</p>
+        </div>
+    </div>
+    </div>
+
+
+
+    </div>
+</div>
+
+<!-- Фиксированный плеер внизу страницы -->
+<div id="nowPlayingBar" class="custom-player" style="display: none;">
+    <div class="player-container">
+        <!-- Обложка трека -->
+        <div class="player-cover">
+            <img id="playerCover" src="/static/img/load.gif" alt="Cover">
+        </div>
+        
+        <!-- Информация о треке -->
+        <div class="player-info">
+            <div class="player-title" id="currentSongTitle">—</div>
+            <div class="player-artist" id="currentArtist">Vocaloid</div>
+        </div>
+        
+        <!-- Кнопки управления -->
+        <div class="player-controls">
+            <button id="prevBtn" class="player-btn" title="Предыдущий">
+                <img src="/static/img/component 1 (1).png" alt="Prev" onerror="this.src='/static/img/load.gif'">
+            </button>
+            
+            <button id="playPauseBtn" class="player-btn play-btn" title="Play/Pause">
+                <img id="playPausePlayerImg" src="/static/img/Polygon 3 (1).png" alt="Play">
+            </button>
+            
+            <button id="nextBtn" class="player-btn" title="Следующий">
+                <img src="/static/img/component 1 (2).png" alt="Next" onerror="this.src='/static/img/load.gif'">
+            </button>
+        </div>
+        
+        <!-- Прогресс-бар -->
+        <div class="player-progress">
+            <span class="time-current" id="currentTime">0:00</span>
+            <div class="progress-bar-container">
+                <input type="range" id="progressBar" class="progress-slider" value="0" step="0.01">
+                <div class="progress-bg"></div>
+            </div>
+            <span class="time-duration" id="duration">0:00</span>
+        </div>
+        
+        <!-- Громкость -->
+        <div class="player-volume">
+            <button id="volumeBtn" class="volume-btn">
+                <img src="/static/img/volume-up.png" alt="Volume" onerror="this.src='/static/img/load.gif'">
+            </button>
+            <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.7">
+        </div>
+
+        <!-- Кнопка режима воспроизведения -->
+            <button id="repeatModeBtn" class="player-btn repeat-mode-btn" title="Режим воспроизведения">
+                <img id="repeatModeImg" src="/static/img/repeat.png" alt="Repeat|Повтор" style="opacity: 0.5;">
+            </button>
+    </div>
+</div>
+
+<!-- Скрытый аудио элемент -->
+<audio id="globalAudioPlayer" style="display: none;"></audio>
+
+<!-- окно регистрации (new) -->
+<div id="login-overlay" style="display: none;">
+    <img src="/static/img/stars.png" class="modal1star">
+    <img src="/static/img/Ellipse1.png" class="elips">
+    <img src="/static/img/Ellipse2.png" class="elips1">
+  <div class="modal">
+    <h2>Вход в аккаунт</h2>
+    <form id="login-form">
+      <input type="email" name="email" placeholder="Email" required />
+      <input type="password" name="password" placeholder="Пароль" required minlength="6" />
+      <button type="submit">Войти</button>
+    </form>
+    <button type="button" id="open-register">Регистрация</button>
+  </div>
+</div>
+
+<div id="register-overlay" style="display: none;">
+    <img src="/static/img/stars.png" class="modal2star">
+    <img src="/static/img/Ellipse1.png" class="elips">
+    <img src="/static/img/Ellipse2.png" class="elips1">
+  <div class="modal">
+    <h2>Регистрация</h2>
+    <form id="register-form">
+      <input type="email" name="email" placeholder="Email" required />
+      <input type="password" name="password" placeholder="Пароль" required minlength="6" />
+      <input type="password" name="confirm-password" placeholder="Подтверждение пароля" required />
+      <button type="submit">Подтвердить</button>
+    </form>
+    <button type="button" id="back-to-login">Уже есть аккаунт?<br> Войти</button>
+  </div>
+
+    <script src="/static/js/registr.js"></script>
+    <script src="/static/js/player.js"></script>
+    <script src="/static/js/index.js"></script>
+</body>
+</html>

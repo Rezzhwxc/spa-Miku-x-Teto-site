@@ -1,0 +1,398 @@
+/* animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes click {
+    0% { scale: 1.05; }
+    50% { scale: 0.95; }
+    100% { scale: 1.05; }
+}
+
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 25px 0px rgba(208, 32, 32, 0.985); }
+    50% { box-shadow: 0 0 40px 0px #00ffffbd; }
+    100% { box-shadow: 0 0 25px 0px rgba(208, 32, 32, 0.985); }
+}
+
+@keyframes pulseGlowOther {
+    0% { box-shadow: 0 0 10px 0px rgba(208, 32, 32, 0.985); }
+    50% { box-shadow: 0 0 20px 0px #00ffffbd; }
+    100% { box-shadow: 0 0 10px 0px rgba(208, 32, 32, 0.985); }
+}
+
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(3px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* анимация перехода */
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes fadeInText {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-25px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideOutLeft {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-25px); }
+}
+
+.fade-out {
+  animation: fadeOut 0.16s ease forwards;
+}
+
+.fade-in {
+  animation: fadeInText 0.2s ease forwards;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.15s ease forwards;
+}
+
+.slide-out-left {
+  animation: slideOutLeft 0.16s ease forwards;
+}
+
+/* Кастомный плеер */
+.custom-player {
+    position: fixed;
+    bottom: 10px;
+    left: 260px;
+    right: 20px;
+    background: linear-gradient(45deg, rgb(31, 30, 30) 20%, #2a2a2a 50%, rgb(31, 30, 30) 100%);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    padding: 12px 10px;
+    margin: 0 20px;
+    z-index: 1000;
+    border: 1px solid rgb(37, 37, 37);
+    border-radius: 22px;
+    box-shadow: 0 0 0 1px #2e2e2e, inset 0 0 0 1px rgb(39, 39, 39);
+}
+
+.player-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    max-width: auto;
+    margin: 0 20px;
+}
+
+/* Обложка плеера */
+.player-cover {
+    width: 100px;
+    height: 100px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    margin: 3px 10px;
+    transition: all 0.2s ease;
+}
+
+.player-cover:hover {
+    scale: 1.045;
+}
+
+.player-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Информация о треке */
+.player-info {
+    min-width: 168px;
+    max-width: 168px;
+    transition: all 0.15s ease;
+}
+
+.player-info.fade-out {
+    opacity: 0;
+    transform: translateY(3px);
+}
+
+.player-info.fade-in {
+    animation: fadeInUp 0.15s ease forwards;
+}
+
+.player-title {
+    font-size: 28px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    color: rgba(255, 255, 255, 0.788);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.player-artist {
+    font-size: 22px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    color: #8C8C8C;
+}
+
+/* Кнопки управления */
+.player-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 10px;
+}
+
+.player-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+.player-btn:disabled {
+    opacity: 0.4;
+    user-select: none;
+}
+
+.player-btn img {
+    width: 24px;
+    height: 24px;
+}
+
+.play-btn {
+    background-color: rgb(206, 206, 206);
+}
+
+.play-btn:hover {
+    background-color: rgb(225, 225, 225);
+    scale: 1.05;
+}
+
+#prevBtn img, #nextBtn img {
+    width: 55px;
+    height: 45px;
+    transition: all 0.2s ease;
+}
+
+#prevBtn img:hover, #nextBtn img:hover {
+    scale: 1.07;
+}
+
+/* Прогресс-бар */
+.player-progress {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 250px;
+    max-width: 550px;
+}
+
+.time-current, .time-duration {
+    font-size: 18px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    color: #8C8C8C;
+    min-width: 40px;
+}
+
+.progress-bar-container {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.progress-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 20px;
+    background: transparent;
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+    padding: 17px 2px;
+}
+
+.progress-slider::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 13px;
+    background: rgba(255, 255, 255, 0.24);
+    border-radius: 7px;
+}
+
+.progress-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 23px;
+    height: 23px;
+    background: #bebebe;
+    border-radius: 45%;
+    cursor: pointer;
+    margin-top: -5px;
+    border: inset 5px #cdcdcd;
+    transition: all 0.1s ease;
+    box-shadow: 0 0 3px black;
+}
+
+.progress-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    border-radius: 50%;
+}
+.progress-slider::-webkit-slider-thumb:active {
+    transform: scale(1);
+}
+
+.progress-slider::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, #10dfd8e2 0%, #de1717 var(--progress, 0%), rgba(255, 255, 255, 0.24) var(--progress, 0%));
+}
+
+.progress-slider::-moz-range-progress {
+    background: #8C8C8C;
+    height: 14px;
+    border-radius: 7px;
+}
+
+/* Громкость */
+.player-volume {
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 17px;
+}
+
+.volume-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.volume-btn:hover {
+    scale: 1.1;
+}
+
+.volume-btn img {
+    width: 42px;
+    height: 42px;
+}
+
+.volume-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 120px;
+    height: 11px;
+    background: transparent;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 15px 2px;
+    transition: all 0.2s ease;
+}
+
+.volume-slider::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 11px;
+    background: rgba(255, 255, 255, 0.24);
+    border-radius: 7px;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #bebebe;
+    border-radius: 45%;
+    cursor: pointer;
+    margin-top: -4px;
+    border: inset 5px #cdcdcd;
+    transition: all 0.1s ease;
+    box-shadow: 0 0 3px black;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    border-radius: 50%;
+}
+.volume-slider::-webkit-slider-thumb:active {
+    transform: scale(1.05);
+}
+
+.volume-slider::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, #e1e1e1 0%, rgb(59, 59, 59) var(--volume, 0%), rgba(255, 255, 255, 0.24) var(--volume, 0%));
+}
+
+.volume-slider::-moz-range-progress {
+    background: #10dfd8e2;
+    height: 14px;
+    border-radius: 7px;
+}
+
+/* Кнопка повтора */
+.repeat-mode-btn {
+    margin-left: 25px;
+    opacity: 0.6;
+    transition: all 0.15s ease;
+    width: 40px;
+    height: 40px;
+}
+
+#repeatModeBtn img {
+    width: 38px;
+    height: 38px;
+}
+
+.repeat-mode-btn:hover {
+    scale: 1.08;
+}
+
+.repeat-mode-btn.active-one,
+.repeat-mode-btn.active-random {
+    opacity: 1;
+}
+
+/* Общие классы анимаций */
+.startstop-click-animation,
+.play-click-animation,
+.volume-click-animation,
+.repeat-click-animation,
+.like-click-animation {
+    animation: click 0.2s ease;
+}
+
+button:focus,
+input:focus{
+    outline: none; box-shadow: none;
+}

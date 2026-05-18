@@ -1,0 +1,412 @@
+body {background-color: rgb(26, 26, 26);
+overflow-y: hidden;}
+
+@font-face {
+  font-family: 'Unbound';
+  src: url(/static/fonts/Unbounded-Regular.ttf) format('truetype');
+}
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.zagol {height: 154px; width: auto;
+    border: rgb(52, 52, 52) 2px solid; 
+    border-radius: 35px; margin-top: 16px; margin-left: 13px;
+    transition: all 0.3s;
+    top:0%; -webkit-user-drag: none;
+    }
+.zagol:hover{border-color: rgb(59, 59, 59);
+            scale: 1.03;}
+.zagol.collapsed{
+    opacity: 0;
+    z-index: -100;
+    transform: translateX(-100px);
+}
+
+#zag-collaps{
+    transition: all 0.3s ease; opacity: 0; z-index: -100;
+    position: absolute; left: -100px;
+    margin-top: 16px; margin-left: 6px;
+    height: 155px;
+    border: rgb(52, 52, 52) 2px solid; 
+    border-radius: 35px;
+}
+#zag-collaps:hover{border-color: rgb(59, 59, 59);}
+#zag-collaps.collapsed{
+    transform: translateX(100px);
+    opacity: 1;
+    z-index: 10;
+}
+
+ /*SIDEBAR ПОЛЕ*/ 
+.sidebar{
+    width: 278px; height: 800px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebar:hover #sidebarToggle{
+    opacity: 1;
+}
+
+.strelka::before{
+    content: '<';
+    color: #e6e3e38c;
+    display: inline-block;
+    font-size: 21px;
+    transition: all 0.3s ease;
+}
+.strelka.collapsed::before {
+    content: '>';
+}
+
+/* SIDEBAR BUTTON */
+#sidebarToggle{
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.27s ease;
+    opacity: 0;
+    position: fixed;
+    left: 256px; top: 60px;
+    background-color: rgb(34, 34, 34);
+    width: 19px; height: 40px;
+    border: 1px solid rgb(51, 51, 51); border-radius: 30px;
+}
+#sidebarToggle:hover{
+    background-color: rgb(43, 43, 43);
+}
+
+#sidebarToggle.collapsed{
+    z-index: 100;
+    left: 122px;
+    scale: 0.95;
+}
+
+
+/* навиг */
+.navig {
+            color: #e6e3e3a4;
+            margin: 10px 0;
+            padding: 10px;
+            font-family: 'unbound';
+        }
+
+        .text-link {
+            background: none;
+            color: inherit;
+            text-decoration: none;
+            font-size: 20px;
+            transition: color 0.3s ease;
+            display: inline;
+            padding: 8px 0;
+            transition: all 0.2s ease;
+        }
+
+        .text-link:hover {
+            color: #fffdfd; 
+        }
+
+        .link-group {background: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        /* Иконка - не часть ссылки */
+        .icon-container {
+            transition: all 0.2s ease;
+            position: relative;
+            width: 30px;
+            height: 30px;
+            flex-shrink: 0;
+            margin: 15px; margin-right: 8px;
+        }
+        .icon-container.collapsed{
+            scale: 1.4;
+            margin-left: 40px;
+        }
+
+        .icon-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: opacity 0.3s ease;
+        }
+
+        .static-icon {
+            opacity: 1;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .gif-icon {
+            transition: all 0.2s ease;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+        }
+
+        .link-group:hover .static-icon {
+            opacity: 0;
+        }
+
+        .link-group:hover .gif-icon {
+            opacity: 1;
+        }
+
+        .link-group.played .static-icon {
+            opacity: 1;
+        }
+
+        .link-group.played .gif-icon {
+            opacity: 0;
+        }
+
+
+.navig{margin-left: 10px; }
+    
+#sozd {position: absolute; 
+        top: 96%;}
+
+.link-group{
+    transition: all 0.3s ease;
+}
+
+.link-group:hover{
+    scale: 1.05;
+}
+
+
+.reg {
+    width: 30px;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.profil {
+    color: #e6e3e3a4;
+    position: absolute;
+    bottom: 0px;
+    left: 10px;
+    background: none;
+    margin: 10px 0;
+    padding: 5px;
+}
+
+.but-prof {
+    color: #e6e3e3a4;
+    font-size: 20px;
+    background: none;
+    margin: 13px 13px;
+    transition: 0.2s ease;
+    padding: 16px;
+    border: 1px solid rgb(37, 37, 37);
+    border-top-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    border-bottom-left-radius: 2px;
+    border-top-right-radius: 2px;
+    box-shadow: 0 0 0 1px #2e2e2e, inset 0 0 0 1px rgb(39, 39, 39);
+    font-family: 'unbound';
+    cursor: pointer;
+    display: inline-flex;     
+    align-items: center;      
+    justify-content: center;  
+    gap: 8px;                 
+}
+            
+.but-prof:hover{color: #fffdfd; background-color: rgba(0, 0, 0, 0.096);
+            box-shadow: 0 0 0 2px #4e4e4e,    /* Вторая граница */
+                inset 0 0 0 2px rgb(39, 39, 39); /* Внутренняя граница */
+                scale: 1.05;}
+
+img{user-select: none; -webkit-user-drag: none;}
+
+.text-link.collapsed{
+    transform: translateX(-100px);
+    scale: 0;
+    opacity: 0;
+    z-index: -100;
+}
+
+.scroll-box {
+            border: 1px solid rgb(37, 37, 37);
+            box-shadow: 
+                0 0 0 1px #2e2e2e, 
+                inset 0 0 0 1px rgb(39, 39, 39);
+            padding: 15px;
+            margin: 20px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            background-color: rgb(31, 30, 30);
+            border-radius: 22px;
+            position: absolute; top: -3px; left: 260px; right: 20px; bottom: 140px;
+            transition: all 0.3s ease;
+        }
+
+.scroll-box.collapsed, .scroll-boxmiku.collapsed, .scroll-boxteto.collapsed {
+    left: 130px;
+}
+.scroll-boxmiku, .scroll-boxteto {
+            border: 1px solid rgb(37, 37, 37);
+            box-shadow: 
+                0 0 0 1px #2e2e2e, 
+                inset 0 0 0 1px rgb(39, 39, 39);
+            padding: 15px;
+            margin: 20px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            overflow-y: auto;
+            background-color: rgb(31, 30, 30);
+            border-radius: 22px;
+            position: absolute; top: 85px; left: 260px; right: 20px; bottom: 140px;
+            transition: all 0.3s ease;
+        }
+
+/*основные параметр модуля  */
+#login-overlay,
+#register-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.78);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    display: none;
+}
+
+#login-overlay.active,
+#register-overlay.active {
+    display: flex;
+}
+
+.modal {
+    background: #161616;
+    color: rgba(255, 255, 255, 0.712);
+    border: 2px solid #2e2e2e71;
+    box-shadow: 0px 0px 40px 3px rgba(55, 213, 182, 0.844);
+    padding: 34px 40px;
+    border-radius: 40px;
+    max-width: 540px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 0;
+    transform: translateY(50px);
+    opacity: 0;
+    transition: transform 0.2s ease, opacity 0.3s ease;
+}
+#login-overlay.active .modal, 
+#register-overlay.active .modal,
+#login-overlay.active .modal1star,
+#register-overlay.active .modal2star {
+    transform: translateY(0);
+    opacity: 1; 
+}
+.modal1star{
+    position: absolute; top: 12%; left: 27%;
+    opacity: 0;
+    transform: translateY(50px);
+    transition: transform 0.2s ease, opacity 0.3s ease;
+}
+.modal2star{
+    position: absolute; top: 7.5%; left: 27%;
+    opacity: 0;
+    transform: translateY(50px);
+    transition: transform 0.2s ease, opacity 0.3s ease;
+}
+
+#login-overlay.active .elips, #login-overlay.active .elips1,
+#register-overlay.active .elips1, #register-overlay.active .elips {
+    opacity: 0.7;  
+}
+.elips{
+    position: absolute; top: 0%; left: 0%;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+    z-index: 0;
+}
+.elips1{
+    position: absolute; bottom: 0%; right: 0%;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+    z-index: 0;
+}
+
+.modal1star,
+.modal2star,
+.elips,
+.elips1 {
+    pointer-events: none;
+}
+
+
+.modal input{
+  font-size: 19px;
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 24px;
+  border: 2px solid #4646466c;
+  border-radius: 8px;
+  background: #2e2e2e6c;
+  color: #d3d3d3;
+  box-sizing: border-box;
+  font-family: 'Unbound';
+  letter-spacing: 1px;
+
+  transition: all 0.15s ease;
+}
+.modal input:focus{
+  background: #3b3b3b6c;
+  border-left: 2px solid rgba(55, 213, 182, 0.844); border-top: 2px solid rgba(55, 213, 182, 0.844);
+  border-bottom: 2px solid rgba(226, 49, 49, 0.844); border-right: 2px solid rgba(226, 49, 49, 0.844);
+  box-shadow: 
+    inset 2px 0 3px -1px rgba(55, 213, 182, 0.844),   
+    inset -2px 0 3px -1px rgba(226, 49, 49, 0.844),
+    inset 0 2px 3px -1px rgba(55, 213, 182, 0.844),   
+    inset 0 -2px 3px -1px rgba(226, 49, 49, 0.844); 
+}
+.modal button {
+  width: 80%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: radial-gradient(circle at top left, rgba(39, 39, 39, 0.685),rgba(27, 27, 27, 0.568),rgba(39, 39, 39, 0.685) );
+  color: #d3d3d3; font-family: 'Unbound';
+  cursor: pointer;
+}
+
+button[type="submit"] {
+  display: block;
+  margin: 0 auto;
+  margin-top: 12px;
+}
+button[type="submit"]:hover{
+  background: radial-gradient(circle at top left, rgba(39, 39, 39, 0.685),
+  rgba(61, 61, 61, 0.568),
+  rgba(39, 39, 39, 0.685) );
+}
+button[type="button"] {
+  background: #212122;
+  margin: 15px 0px; 
+}
+button[type="button"]:hover{
+  background: radial-gradient(circle at top left, rgba(39, 39, 39, 0.685),
+  rgba(61, 61, 61, 0.568),
+  rgba(39, 39, 39, 0.685) );
+}
+
+.modal h2{
+  text-align: center; letter-spacing: 2px; 
+  font-size: 36px; font-family: 'Unbound';
+  margin: 24px 10px; margin-bottom: 50px;
+    background: linear-gradient(50deg, rgba(9, 214, 214, 0.921), rgb(185, 185, 185), rgba(9, 214, 214, 0.921));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
