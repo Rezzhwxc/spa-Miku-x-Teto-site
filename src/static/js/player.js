@@ -329,8 +329,45 @@ function playSongById(songId, autoPlay = true) {
     updatePlayerUI(song, { silent: !shouldAnimate });
 
     if (autoPlay) {
-        resumeAudioContext();
-        currentAudio.play().catch(e => console.log('Автовоспроизведение заблокировано'));
+        // Функция для воспроизведения с разблокировкой
+        const attemptPlay = () => {
+            currentAudio.play().catch(async (e) => {
+                console.log('Автовоспроизведение заблокировано, разблокируем AudioContext...');
+                
+                // Разблокируем AudioContext
+                if (audioContext && audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                }
+                
+                // Пробуем снова
+                try {
+                    await currentAudio.play();
+                    console.log('Воспроизведение успешно после разблокировки');
+                } catch (err) {
+                    console.log('Плеер будет ждать клика пользователя');
+                    // Показываем сообщение пользователю
+                    if (playerElements.title) {
+                        const originalTitle = playerElements.title.textContent;
+                        playerElements.title.textContent = '🔊 Нажмите на страницу для воспроизведения';
+                        setTimeout(() => {
+                            if (playerElements.title) playerElements.title.textContent = originalTitle;
+                        }, 2000);
+                    }
+                }
+            });
+        };
+        
+        // Если AudioContext приостановлен, сначала разблокируем
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume().then(() => {
+                attemptPlay();
+            }).catch(() => {
+                attemptPlay();
+            });
+        } else {
+            attemptPlay();
+        }
+        
         updateCirculIcon(songId, true);
         if (playerElements.playPauseImg) playerElements.playPauseImg.src = '/static/img/pause-button.png';
     }
@@ -856,3 +893,7 @@ currentAudio.addEventListener('pause', () => {
     syncGlobals();
     notifyPlayStateChange();
 });
+window.attachLikeHandlers = attachLikeHandlers;
+window.attachVocaloidLinkHandlers = attachVocaloidLinkHandlers;
+window.togglePlayPause = togglePlayPause;
+window.playSongById = playSongById;

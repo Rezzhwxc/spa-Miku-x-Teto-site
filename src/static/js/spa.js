@@ -220,27 +220,40 @@ async function navigateTo(path, pushState = true) {
             appView.style.opacity = '1';
         });
 
-        delegateLinks(appView);
-        applySidebarState();
-        route.js();
-        
-        // Инициализация плеера и загрузки треков на ГЛАВНОЙ (/index) и на /tracks
-        if (path === '/index' || path === '/tracks') {
-            setTimeout(async () => {
+        // ─── ИНИЦИАЛИЗАЦИЯ ПОСЛЕ ЗАГРУЗКИ КОНТЕНТА ────────────────────────────
+            if (path === '/index') {
+                setTimeout(async () => {
                 if (typeof loadSongs === 'function') {
-                    log(`Вызов loadSongs() для страницы ${path}`);
                     await loadSongs();
                 }
                 if (typeof restorePlayerUI === 'function') {
                     restorePlayerUI();
                 }
-                // Запускаем поиск только если элемент существует (на /index он есть, на /tracks может не быть)
+                // Переинициализируем круги на главной
+                if (typeof reinitCirculindex === 'function') {
+                    setTimeout(() => {
+                        reinitCirculindex();
+                    }, 50);
+                } else if (typeof refreshCirculsUI === 'function') {
+                    refreshCirculsUI();
+                } else if (typeof initCirculindex === 'function') {
+                    initCirculindex();
+                }
+                // Запускаем поиск
                 if (typeof initSearch === 'function') {
                     const searchInput = document.getElementById('searchInput');
                     if (searchInput) {
-                        log(`Вызов initSearch() для страницы ${path}`);
                         initSearch();
-                    }
+                }
+            }
+        }, 100);
+    } else if (path === '/tracks') {
+            setTimeout(async () => {
+                if (typeof loadSongs === 'function') {
+                    await loadSongs();
+                }
+                if (typeof restorePlayerUI === 'function') {
+                    restorePlayerUI();
                 }
             }, 0);
         }
@@ -272,7 +285,7 @@ function showError(msg) {
 
 function initIndex() { 
     log('initIndex');
-    // loadSongs и initSearch вызываются в navigateTo после рендера
+    // Все инициализации теперь в navigateTo
 }
 
 function initTracks() {

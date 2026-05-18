@@ -1,4 +1,4 @@
-// knopka
+// knopka (sidebar)
 let toggleButton = document.getElementById('sidebarToggle');
 let contentbox = document.querySelector('.scroll-box');
 let strelka = document.querySelector('.strelka');
@@ -7,8 +7,6 @@ let linkimg = document.querySelectorAll('.icon-container');
 let zagol = document.querySelector('.zagol');
 let zagcollaps = document.getElementById('zag-collaps');
 
-
-// ===== ЗАГРУЗКА СОСТОЯНИЯ =====
 const savedState = localStorage.getItem('sidebarCollapsed');
 if (savedState === 'true') {
     contentbox.classList.add('collapsed');
@@ -21,29 +19,20 @@ if (savedState === 'true') {
     toggleButton.setAttribute('aria-label', 'Развернуть сайдбар');
 }
 
-// ===== КЛИК =====
 toggleButton.addEventListener('click', () => {
     contentbox.classList.toggle('collapsed');
     toggleButton.classList.toggle('collapsed');
     strelka.classList.toggle('collapsed');
     zagol.classList.toggle('collapsed');
     zagcollaps.classList.toggle('collapsed');
-
     linkimg.forEach(el => el.classList.toggle('collapsed'));
     txt.forEach(el => el.classList.toggle('collapsed'));
-
     const isCollapsed = contentbox.classList.contains('collapsed');
     toggleButton.setAttribute('aria-label', isCollapsed ? 'Развернуть сайдбар' : 'Свернуть сайдбар');
-    
-    // ===== СОХРАНЕНИЕ =====
     localStorage.setItem('sidebarCollapsed', isCollapsed);
 });
 
-
-// ─── ФИЛЬТРАЦИЯ ТРЕКОВ ПО ВОКАЛОИДАМ ДЛЯ INDEX.HTML ──────────────────────────
-
-let indexHandlersBound = false;
-let indexCurrentFilter = null;
+// ==================== CIRCULINDEX ФИЛЬТРАЦИЯ ====================
 
 const defaultCovers = {
     '1': '/static/img/miku-cover.jpg',
@@ -51,55 +40,56 @@ const defaultCovers = {
     '3': '/static/img/duo-cover.jpg'
 };
 
-function normCharacterId(characterId) {
-    const n = Number(characterId);
-    return Number.isFinite(n) ? n : null;
-}
+let currentActiveFilter = null;
 
-function getBaseSongsList() {
-    return window.originalSongsList?.length ? window.originalSongsList : (window.songsList || []);
-}
-
-function getSongsByCharacter(characterId) {
-    const songsList = getBaseSongsList();
-    if (!songsList.length) return [];
-    const id = normCharacterId(characterId);
-    if (id === null) return songsList;
-    return songsList.filter(song => Number(song.vocaloid_id) === id);
+function getSongs() {
+    return window.songsList || [];
 }
 
 function setCirculCover(circul, characterId) {
     let coverImg = circul.querySelector('.circulindex-cover');
-
     if (!coverImg) {
         coverImg = document.createElement('img');
         coverImg.className = 'circulindex-cover';
         circul.insertBefore(coverImg, circul.firstChild);
     }
-
     coverImg.src = defaultCovers[characterId] || '/static/img/default-cover.png';
-    coverImg.alt = circul.querySelector('.txtindex')?.innerText || 'Cover';
 }
 
 function updateCirculPlayIcon(characterId, isPlaying) {
     const circul = document.querySelector(`.circulindex[data-character="${characterId}"]`);
     if (!circul) return;
-
     const icon = circul.querySelector('.iconindex');
     if (icon) {
         icon.src = isPlaying ? '/static/img/pause-button.png' : '/static/img/Polygon 3 (1).png';
     }
 }
 
+function updateAllCirculPlayIcons() {
+    const songs = getSongs();
+    const currentSong = songs.find(s => s.id == window.currentSongId);
+    const isPlaying = window.currentAudio && !window.currentAudio.paused;
+    
+    document.querySelectorAll('.circulindex').forEach(circul => {
+        const icon = circul.querySelector('.iconindex');
+        if (icon) icon.src = '/static/img/Polygon 3 (1).png';
+    });
+    
+    if (currentSong && isPlaying) {
+        const activeId = String(currentSong.vocaloid_id);
+        updateCirculPlayIcon(activeId, true);
+    }
+}
+
 function displayFilteredSongs(songs) {
     const container = document.getElementById('song-container');
     if (!container) return;
-
-    if (!songs || songs.length === 0) {
-        container.innerHTML = '<p style="text-align:center;color:#e6e3e3d7;font-size:27px;font-family:monospace;user-select:none">Нет треков с этим вокалоидом 😔</p>';
+    
+    if (!songs.length) {
+        container.innerHTML = '<p style="text-align:center;color:#e6e3e3d7;font-size:27px">Нет треков с этим вокалоидом 😔</p>';
         return;
     }
-
+    
     container.innerHTML = songs.map(song => {
         const vocaloidName = song.vocaloid_name || 'Vocaloid';
         const vocaloidUrl = (song.vocaloid_url && song.vocaloid_url !== 'null') ? song.vocaloid_url : '#';
@@ -110,197 +100,183 @@ function displayFilteredSongs(songs) {
                     <p class="namet">${escapeHtml(song.name)}</p>
                     <p class="autor vocaloid-link" data-url="${vocaloidUrl}">${escapeHtml(vocaloidName)}</p>
                 </div>
-                <button class="like-song-btn" data-id="${song.id}" data-liked="false">
-                    <img class="like-icon" src="/static/img/heart.png" alt="добавить в избранное">
-                </button>
             </div>
         `;
     }).join('');
-
-    if (typeof window.attachSongHandlers === 'function') window.attachSongHandlers();
-    if (typeof window.attachLikeHandlers === 'function') window.attachLikeHandlers();
-    if (typeof window.attachVocaloidLinkHandlers === 'function') window.attachVocaloidLinkHandlers();
-    if (typeof window.attachSongBoxHandlers === 'function') window.attachSongBoxHandlers();
-}
-
-function getRandomSongByCharacter(characterId) {
-    const songsList = getBaseSongsList();
-    if (!songsList.length) return null;
-
-    const id = normCharacterId(characterId);
-    const filtered = id === null
-        ? songsList
-        : songsList.filter(song => Number(song.vocaloid_id) === id);
-
-    if (!filtered.length) return null;
-    const randomIndex = Math.floor(Math.random() * filtered.length);
-    return filtered[randomIndex];
+    
+    // Подключаем обработчики из player.js
+    if (typeof attachLikeHandlers === 'function') attachLikeHandlers();
+    if (typeof attachVocaloidLinkHandlers === 'function') attachVocaloidLinkHandlers();
 }
 
 function filterByCharacter(characterId) {
-    const songsList = getBaseSongsList();
-    if (!songsList.length) return;
-
-    const id = normCharacterId(characterId);
-    indexCurrentFilter = id;
-
-    const filtered = id === null
-        ? songsList
-        : songsList.filter(song => Number(song.vocaloid_id) === id);
-
+    const songs = getSongs();
+    if (!songs.length) return;
+    
+    currentActiveFilter = characterId;
+    const filtered = songs.filter(song => String(song.vocaloid_id) === characterId);
     displayFilteredSongs(filtered);
-
+    
     document.querySelectorAll('.circulindex').forEach(el => el.classList.remove('active-filter'));
-    if (id !== null) {
-        document.querySelector(`.circulindex[data-character="${id}"]`)?.classList.add('active-filter');
-    }
+    document.querySelector(`.circulindex[data-character="${characterId}"]`)?.classList.add('active-filter');
 }
 
-function playRandomSongByCharacter(characterId) {
-    const randomSong = getRandomSongByCharacter(characterId);
-    if (randomSong && typeof window.playSongById === 'function') {
-        window.playSongById(randomSong.id, true);
-    }
+function getRandomSongByCharacter(characterId) {
+    const songs = getSongs();
+    if (!songs.length) return null;
+    const filtered = songs.filter(song => String(song.vocaloid_id) === characterId);
+    if (!filtered.length) return null;
+    return filtered[Math.floor(Math.random() * filtered.length)];
 }
 
 function togglePlayPauseForCharacter(characterId) {
-    const songsList = getBaseSongsList();
-    if (!songsList.length) return;
-
-    const id = normCharacterId(characterId);
-    const currentSong = songsList.find(s => s.id == window.currentSongId);
-
+    const songs = getSongs();
+    if (!songs.length) return;
+    
+    const currentSong = songs.find(s => s.id == window.currentSongId);
     if (!currentSong) {
-        playRandomSongByCharacter(characterId);
+        const randomSong = getRandomSongByCharacter(characterId);
+        if (randomSong && typeof playSongById === 'function') playSongById(randomSong.id, true);
         return;
     }
-
-    const isCurrentInCategory = Number(currentSong.vocaloid_id) === id;
-
-    if (isCurrentInCategory) {
-        if (typeof window.togglePlayPause === 'function') {
-            window.togglePlayPause();
-        }
+    
+    if (String(currentSong.vocaloid_id) === characterId) {
+        if (typeof togglePlayPause === 'function') togglePlayPause();
     } else {
-        playRandomSongByCharacter(characterId);
+        const randomSong = getRandomSongByCharacter(characterId);
+        if (randomSong && typeof playSongById === 'function') playSongById(randomSong.id, true);
     }
 }
 
-function refreshCirculsUI() {
-    const circuls = document.querySelectorAll('.circulindex');
-
-    circuls.forEach(circul => {
-        const characterId = circul.dataset.character;
-        setCirculCover(circul, characterId);
-    });
-
-    const currentSong = getBaseSongsList().find(s => s.id == window.currentSongId);
-    const isPlaying = !!(window.currentAudio && !window.currentAudio.paused);
-
-    circuls.forEach(circul => {
-        const characterId = circul.dataset.character;
-        const id = normCharacterId(characterId);
-        const isThisCharacterPlaying = !!currentSong && Number(currentSong.vocaloid_id) === id;
-        updateCirculPlayIcon(characterId, isThisCharacterPlaying && isPlaying);
-    });
-}
-
-function initCharacterFilter() {
+// Полная переинициализация (для SPA)
+function reinitCirculindex() {
     const circuls = document.querySelectorAll('.circulindex');
     if (!circuls.length) return;
-
+    
+    console.log('[INDEX] Реинициализация после возврата');
+    
     circuls.forEach(circul => {
-        if (circul._indexBound) return;
-        circul._indexBound = true;
+        const charId = circul.dataset.character;
+        
+        // Восстанавливаем обложку
+        setCirculCover(circul, charId);
+        
+        // Обновляем иконку Play/Pause
+        const currentSong = getSongs().find(s => s.id == window.currentSongId);
+        const isPlaying = window.currentAudio && !window.currentAudio.paused;
+        const isActive = currentSong && String(currentSong.vocaloid_id) === charId;
+        const icon = circul.querySelector('.iconindex');
+        if (icon) {
+            icon.src = (isActive && isPlaying) ? '/static/img/pause-button.png' : '/static/img/Polygon 3 (1).png';
+        }
+        
+        // ПЕРЕСОЗДАЁМ ОБРАБОТЧИКИ (удаляем старые и добавляем новые)
+        // Удаляем старый обработчик клика на круге
+        const oldClickHandler = circul._clickHandler;
+        if (oldClickHandler) {
+            circul.removeEventListener('click', oldClickHandler);
+        }
+        // Создаём новый обработчик
+        const clickHandler = (e) => {
+            if (e.target.closest('.startstop')) return;
+            filterByCharacter(charId);
+        };
+        circul._clickHandler = clickHandler;
+        circul.addEventListener('click', clickHandler);
+        
+        // Обработчик для кнопки Play
+        const btn = circul.querySelector('.startstop');
+        if (btn) {
+            const oldPlayHandler = btn._playHandler;
+            if (oldPlayHandler) {
+                btn.removeEventListener('click', oldPlayHandler);
+            }
+            const playHandler = (e) => {
+                e.stopPropagation();
+                togglePlayPauseForCharacter(charId);
+            };
+            btn._playHandler = playHandler;
+            btn.addEventListener('click', playHandler);
+        }
+    });
+    
+    // Восстанавливаем фильтр, если был активен
+    if (currentActiveFilter) {
+        const filtered = getSongs().filter(song => String(song.vocaloid_id) === currentActiveFilter);
+        displayFilteredSongs(filtered);
+        document.querySelectorAll('.circulindex').forEach(el => el.classList.remove('active-filter'));
+        document.querySelector(`.circulindex[data-character="${currentActiveFilter}"]`)?.classList.add('active-filter');
+    } else {
+        const songs = getSongs();
+        if (songs.length) displayFilteredSongs(songs);
+    }
+}
 
-        const characterId = circul.dataset.character;
-        setCirculCover(circul, characterId);
+// Обновляем refreshCirculsUI (для совместимости)
+function refreshCirculsUI() {
+    reinitCirculindex();
+}
 
+function initCirculindex() {
+    const circuls = document.querySelectorAll('.circulindex');
+    if (!circuls.length) return;
+    
+    console.log('[INDEX] Инициализация circulindex');
+    
+    circuls.forEach(circul => {
+        const charId = circul.dataset.character;
+        setCirculCover(circul, charId);
+        
+        // Клик по кругу (фильтрация)
         circul.addEventListener('click', (e) => {
             if (e.target.closest('.startstop')) return;
-            filterByCharacter(characterId);
+            filterByCharacter(charId);
         });
-
+        
+        // Кнопка Play
         const btn = circul.querySelector('.startstop');
         if (btn) {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                togglePlayPauseForCharacter(characterId);
+                togglePlayPauseForCharacter(charId);
             });
         }
     });
-
-    displayFilteredSongs(getBaseSongsList());
-    refreshCirculsUI();
+    
+    // Показываем все треки
+    const songs = getSongs();
+    if (songs.length) displayFilteredSongs(songs);
 }
 
-function bindIndexRefreshEvents() {
-    if (indexHandlersBound) return;
-    indexHandlersBound = true;
+// Слушаем события плеера
+document.addEventListener('playStateChanged', () => {
+    updateAllCirculPlayIcons();
+});
 
-    document.addEventListener('play', refreshCirculsUI, true);
-    document.addEventListener('pause', refreshCirculsUI, true);
-    document.addEventListener('ended', refreshCirculsUI, true);
+// Следим за загрузкой треков
+let songsLoaded = false;
+let originalLoadSongs = window.loadSongs;
 
-    document.addEventListener('playStateChanged', () => {
-        refreshCirculsUI();
-    });
-}
-
-function tryInitIndexFilter() {
-    if (window.songsList && window.songsList.length > 0) {
-        initCharacterFilter();
-        bindIndexRefreshEvents();
-        return true;
-    }
-    return false;
-}
-
-window.initCharacterFilter = initCharacterFilter;
-window.filterByCharacter = filterByCharacter;
-window.playRandomSongByCharacter = playRandomSongByCharacter;
-window.refreshCirculsUI = refreshCirculsUI;
-window.updateCirculPlayIcon = updateCirculPlayIcon;
-window.getRandomSongByCharacter = getRandomSongByCharacter;
-window.togglePlayPauseForCharacter = togglePlayPauseForCharacter;
-window.setCirculCover = setCirculCover;
-window.displayFilteredSongs = displayFilteredSongs;
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        const checkInterval = setInterval(() => {
-            if (window.songsList && window.songsList.length > 0) {
-                clearInterval(checkInterval);
-                initCharacterFilter();
-                bindIndexRefreshEvents();
-            }
-        }, 100);
-
-        setTimeout(() => {
-            clearInterval(checkInterval);
-            if (window.songsList && window.songsList.length) {
-                initCharacterFilter();
-                bindIndexRefreshEvents();
-            }
-        }, 3000);
-    });
-} else {
-    tryInitIndexFilter();
-    bindIndexRefreshEvents();
-}
-
-if (typeof window !== 'undefined') {
-    let lastUrl = window.location.pathname;
-    const observer = new MutationObserver(() => {
-        if (window.location.pathname !== lastUrl) {
-            lastUrl = window.location.pathname;
-            if (lastUrl === '/index' || lastUrl === '/') {
-                setTimeout(() => {
-                    refreshCirculsUI();
-                    displayFilteredSongs(getBaseSongsList());
-                }, 100);
-            }
+if (originalLoadSongs) {
+    window.loadSongs = async function() {
+        await originalLoadSongs();
+        if (!songsLoaded) {
+            songsLoaded = true;
+            setTimeout(() => {
+                initCirculindex();
+            }, 100);
         }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
+    };
 }
+
+// Если songsList уже загружена
+if (window.songsList && window.songsList.length) {
+    setTimeout(() => {
+        initCirculindex();
+    }, 100);
+}
+
+// Экспорт функций
+window.refreshCirculsUI = refreshCirculsUI;
+window.initCirculindex = initCirculindex;
+window.filterByCharacter = filterByCharacter;
