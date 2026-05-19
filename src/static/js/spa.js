@@ -248,15 +248,21 @@ async function navigateTo(path, pushState = true) {
             }
         }, 100);
     } else if (path === '/tracks') {
-            setTimeout(async () => {
-                if (typeof loadSongs === 'function') {
-                    await loadSongs();
-                }
-                if (typeof restorePlayerUI === 'function') {
-                    restorePlayerUI();
-                }
-            }, 0);
+    setTimeout(async () => {
+        if (typeof loadSongs === 'function') {
+            await loadSongs();
         }
+        if (typeof restorePlayerUI === 'function') {
+            restorePlayerUI();
+        }
+        // ★ Инициализация поиска на странице треков ★
+        if (typeof initSearch === 'function') {
+            setTimeout(() => {
+                initSearch();
+            }, 50);
+        }
+    }, 0);
+}
         
         loaderDone();
 

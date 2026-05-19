@@ -10,6 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
 
+    // ★ ВОССТАНОВЛЕНИЕ СЕССИИ ПРИ ЗАГРУЗКЕ ★
+    const savedEmail = localStorage.getItem('user_email');
+    const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
+
+    if (savedEmail && isLoggedIn) {
+        const regBtn = document.getElementById('regjs');
+        if (regBtn) {
+            regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">' + savedEmail.split('@')[0];
+        }
+    }
+
     function validateEmail(email) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
@@ -107,60 +118,87 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
 
-            const email = loginForm.querySelector('input[name="email"]')?.value.trim();
-            const password = loginForm.querySelector('input[name="password"]')?.value;
+        const email = loginForm.querySelector('input[name="email"]')?.value.trim();
+        const password = loginForm.querySelector('input[name="password"]')?.value;
 
-            if (!email || !password) {
-                alert('Заполни email и пароль');
-                return;
-            }
+        if (!email || !password) {
+            alert('Заполни email и пароль');
+            return;
+        }
 
-            if (!validateEmail(email)) {
-                alert('Введите корректный email');
-                return;
-            }
+        if (!validateEmail(email)) {
+            alert('Введите корректный email');
+            return;
+        }
 
-            if (!validatePassword(password)) {
-                alert('Пароль должен быть минимум 6 символов');
-                return;
-            }
+        if (!validatePassword(password)) {
+            alert('Пароль должен быть минимум 6 символов');
+            return;
+        }
 
-            console.log('Логин:', { email, password });
-        });
-    }
+        // ★ СОХРАНЯЕМ ДАННЫЕ ★
+        localStorage.setItem('user_email', email);
+        localStorage.setItem('is_logged_in', 'true');
+        
+        console.log('Логин:', { email, password });
+        alert('Добро пожаловать, ' + email + '!');
+        
+        // Закрываем окно
+        hideAllModals();
+        
+        // Меняем текст кнопки
+        const regBtn = document.getElementById('regjs');
+        if (regBtn) {
+            regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">' + email.split('@')[0];
+        }
+    });
+}
 
     if (registerForm) {
-        registerForm.addEventListener('submit', (e) => {
-            e.preventDefault();
+    registerForm.addEventListener('submit', (e) => {
+        e.preventDefault();
 
-            const email = registerForm.querySelector('input[name="email"]')?.value.trim();
-            const password = registerForm.querySelector('input[name="password"]')?.value;
-            const confirmPassword = registerForm.querySelector('input[name="confirm-password"]')?.value;
+        const email = registerForm.querySelector('input[name="email"]')?.value.trim();
+        const password = registerForm.querySelector('input[name="password"]')?.value;
+        const confirmPassword = registerForm.querySelector('input[name="confirm-password"]')?.value;
 
-            if (!email || !password || !confirmPassword) {
-                alert('Заполни все поля');
-                return;
-            }
+        if (!email || !password || !confirmPassword) {
+            alert('Заполни все поля');
+            return;
+        }
 
-            if (!validateEmail(email)) {
-                alert('Введите корректный email');
-                return;
-            }
+        if (!validateEmail(email)) {
+            alert('Введите корректный email');
+            return;
+        }
 
-            if (!validatePassword(password)) {
-                alert('Пароль должен быть минимум 6 символов');
-                return;
-            }
+        if (!validatePassword(password)) {
+            alert('Пароль должен быть минимум 6 символов');
+            return;
+        }
 
-            if (password !== confirmPassword) {
-                alert('Пароли не совпадают');
-                return;
-            }
+        if (password !== confirmPassword) {
+            alert('Пароли не совпадают');
+            return;
+        }
 
-            console.log('Регистрация:', { email, password });
-        });
-    }
-});
+        // ★ СОХРАНЯЕМ ДАННЫЕ ★
+        localStorage.setItem('user_email', email);
+        localStorage.setItem('is_logged_in', 'true');
+        
+        console.log('Регистрация:', { email, password });
+        alert('Регистрация успешна! Добро пожаловать, ' + email);
+        
+        // Закрываем окно
+        hideAllModals();
+        
+        // Меняем текст кнопки
+        const regBtn = document.getElementById('regjs');
+        if (regBtn) {
+            regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">' + email.split('@')[0];
+        }
+    });
+}});

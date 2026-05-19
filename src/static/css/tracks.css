@@ -13,7 +13,7 @@
 /* Блок с кругами */
 #block {
     overflow: visible;
-    margin: 20px;
+    margin: 20px; margin-top: 75px;
     padding-top: 50px;
     display: flex;
     height: 500px;
