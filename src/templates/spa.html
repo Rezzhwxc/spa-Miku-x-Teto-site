@@ -117,6 +117,8 @@
 
 <!-- ═══════════════════ PROFILE BUTTON ═══════════════════ -->
 <div class="profil">
+    <button class="exitaccount">Выйти из аккаунта?</button>
+
     <button class="but-prof" id="regjs">
         <img class="reg" src="/static/img/add-user (1).png">Регистрация
     </button>
@@ -211,6 +213,17 @@
 
 <!-- SPA Router — loaded last so it can reference player globals -->
 <script src="/static/js/spa.js"></script>
+
+<!-- ═══════════════════ LOGOUT CONFIRM MODAL ═══════════════════ -->
+<div id="logoutConfirmOverlay" class="logout-confirm-overlay">
+    <div class="logout-confirm-modal">
+        <p>Вы уверены, что хотите выйти?</p>
+        <div class="logout-confirm-buttons">
+            <button id="logoutConfirmYes" class="logout-confirm-yes">Выйти</button>
+            <button id="logoutConfirmCancel" class="logout-confirm-cancel">Отменить</button>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

@@ -21,6 +21,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+// ★ ФУНКЦИЯ ДЛЯ ВСПЛЫВАЮЩИХ УВЕДОМЛЕНИЙ ★
+function showToast(message, type = 'success') {
+    // Удаляем старый тост, если есть
+    const oldToast = document.querySelector('.toast-notification');
+    if (oldToast) {
+        oldToast.remove();
+    }
+    
+    // Создаём новый тост
+    const toast = document.createElement('div');
+    toast.className = `toast-notification ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    // Анимация появления
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+    
+    // Плавное исчезновение и удаление через 3 секунды
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            if (toast.parentNode) toast.remove();
+        }, 300);
+    }, 2800);
+}   
+
     function validateEmail(email) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
@@ -124,27 +152,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = loginForm.querySelector('input[name="email"]')?.value.trim();
         const password = loginForm.querySelector('input[name="password"]')?.value;
 
-        if (!email || !password) {
-            alert('Заполни email и пароль');
-            return;
-        }
+       if (!email || !password) {
+    showToast('Заполни email и пароль', 'error');
+    return;
+}
 
         if (!validateEmail(email)) {
-            alert('Введите корректный email');
-            return;
-        }
+    showToast('Введите корректный email', 'error');
+    return;
+}
 
-        if (!validatePassword(password)) {
-            alert('Пароль должен быть минимум 6 символов');
-            return;
-        }
+if (!validatePassword(password)) {
+    showToast('Пароль должен быть минимум 6 символов', 'error');
+    return;
+}
 
-        // ★ СОХРАНЯЕМ ДАННЫЕ ★
-        localStorage.setItem('user_email', email);
-        localStorage.setItem('is_logged_in', 'true');
-        
-        console.log('Логин:', { email, password });
-        alert('Добро пожаловать, ' + email + '!');
+// ★ СОХРАНЯЕМ ДАННЫЕ ★
+localStorage.setItem('user_email', email);
+localStorage.setItem('is_logged_in', 'true');
+
+console.log('Логин:', { email, password });
+showToast('Добро пожаловать, ' + email.split('@')[0] + '! 🎵', 'success');
         
         // Закрываем окно
         hideAllModals();
@@ -166,31 +194,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const confirmPassword = registerForm.querySelector('input[name="confirm-password"]')?.value;
 
         if (!email || !password || !confirmPassword) {
-            alert('Заполни все поля');
-            return;
-        }
+    showToast('Заполни все поля', 'error');
+    return;
+}
 
         if (!validateEmail(email)) {
-            alert('Введите корректный email');
-            return;
-        }
+    showToast('Введите корректный email', 'error');
+    return;
+}
 
-        if (!validatePassword(password)) {
-            alert('Пароль должен быть минимум 6 символов');
-            return;
-        }
+if (!validatePassword(password)) {
+    showToast('Пароль должен быть минимум 6 символов', 'error');
+    return;
+}
 
-        if (password !== confirmPassword) {
-            alert('Пароли не совпадают');
-            return;
-        }
+if (password !== confirmPassword) {
+    showToast('Пароли не совпадают', 'error');
+    return;
+}
 
-        // ★ СОХРАНЯЕМ ДАННЫЕ ★
-        localStorage.setItem('user_email', email);
-        localStorage.setItem('is_logged_in', 'true');
-        
-        console.log('Регистрация:', { email, password });
-        alert('Регистрация успешна! Добро пожаловать, ' + email);
+// ★ СОХРАНЯЕМ ДАННЫЕ ★
+localStorage.setItem('user_email', email);
+localStorage.setItem('is_logged_in', 'true');
+
+console.log('Регистрация:', { email, password });
+showToast('Регистрация успешна! Добро пожаловать, ' + email.split('@')[0] + '! 🎉', 'success');
         
         // Закрываем окно
         hideAllModals();
@@ -201,4 +229,97 @@ document.addEventListener('DOMContentLoaded', () => {
             regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">' + email.split('@')[0];
         }
     });
+    // ★ ФУНКЦИЯ ВЫХОДА ИЗ АККАУНТА ★
+function logoutUser() {
+    // Удаляем данные из localStorage
+    localStorage.removeItem('user_email');
+    localStorage.removeItem('is_logged_in');
+    
+    // Возвращаем кнопку регистрации в исходное состояние
+    const regBtn = document.getElementById('regjs');
+    if (regBtn) {
+        regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">Регистрация';
+    }
+    
+    // Показываем уведомление
+    showToast('Вы вышли из аккаунта. До новых встреч! 👋', 'success');
+    
+    // Закрываем модальное окно подтверждения
+    const logoutOverlay = document.getElementById('logoutConfirmOverlay');
+    if (logoutOverlay) {
+        logoutOverlay.classList.remove('active');
+        setTimeout(() => {
+            logoutOverlay.style.display = 'none';
+        }, 300);
+    }
+    
+    // Обновляем интерфейс (сбрасываем всё к состоянию "не авторизован")
+    // Принудительно обновляем страницу, чтобы сбросить все состояния
+    setTimeout(() => {
+        location.reload();
+    }, 500);
+}
+
+// ★ ОБРАБОТЧИК КНОПКИ ВЫХОДА ★
+const exitBtn = document.querySelector('.exitaccount');
+const logoutOverlay = document.getElementById('logoutConfirmOverlay');
+const logoutConfirmYes = document.getElementById('logoutConfirmYes');
+const logoutConfirmCancel = document.getElementById('logoutConfirmCancel');
+
+function showLogoutConfirm() {
+    if (!logoutOverlay) return;
+    logoutOverlay.style.display = 'flex';
+    setTimeout(() => {
+        logoutOverlay.classList.add('active');
+    }, 10);
+}
+
+function hideLogoutConfirm() {
+    if (!logoutOverlay) return;
+    logoutOverlay.classList.remove('active');
+    setTimeout(() => {
+        logoutOverlay.style.display = 'none';
+    }, 300);
+}
+
+if (exitBtn) {
+    exitBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Проверяем, залогинен ли пользователь
+        const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
+        if (!isLoggedIn) {
+            showToast('Вы не авторизованы!', 'error');
+            return;
+        }
+        showLogoutConfirm();
+    });
+}
+
+if (logoutConfirmYes) {
+    logoutConfirmYes.addEventListener('click', () => {
+        logoutUser();
+    });
+}
+
+if (logoutConfirmCancel) {
+    logoutConfirmCancel.addEventListener('click', () => {
+        hideLogoutConfirm();
+    });
+}
+
+// Закрытие по клику на фон
+if (logoutOverlay) {
+    logoutOverlay.addEventListener('click', (e) => {
+        if (e.target === logoutOverlay) {
+            hideLogoutConfirm();
+        }
+    });
+}
+
+// Закрытие по Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && logoutOverlay && logoutOverlay.classList.contains('active')) {
+        hideLogoutConfirm();
+    }
+});
 }});

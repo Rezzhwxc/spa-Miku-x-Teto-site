@@ -195,13 +195,39 @@ overflow-y: hidden;}
     background: none;
     margin: 10px 0;
     padding: 5px;
+
+    display: grid;
+    align-items: center;
 }
+
+.exitaccount {
+    color: #e6e3e3a4;
+    font-size: 15px;
+    background: none;
+    margin:  0px 16px;
+    transition: 0.2s ease;
+    padding: 16px;
+    border: 1px solid rgb(37, 37, 37);
+    border-radius: 20px;
+    box-shadow: 0 0 0 1px #2e2e2e;
+    font-family: 'unbound';
+    transition: all 0.2s ease; 
+    cursor: pointer;
+    
+    min-width: 150px;
+    transform: translateY(50px);
+    opacity: 0;
+    pointer-events: none;
+}
+.exitaccount:hover{color: #fffdfd; background-color: rgba(0, 0, 0, 0.096);
+            box-shadow: 0 0 0 2px #4e4e4e;
+                scale: 1.05;}
 
 .but-prof {
     color: #e6e3e3a4;
     font-size: 20px;
     background: none;
-    margin: 13px 13px;
+    margin: 13px;
     transition: 0.2s ease;
     padding: 16px;
     border: 1px solid rgb(37, 37, 37);
@@ -215,13 +241,21 @@ overflow-y: hidden;}
     display: inline-flex;     
     align-items: center;      
     justify-content: center;  
-    gap: 8px;                 
+    gap: 8px;
+    
+    min-width: 235px;
 }
             
 .but-prof:hover{color: #fffdfd; background-color: rgba(0, 0, 0, 0.096);
             box-shadow: 0 0 0 2px #4e4e4e,    /* Вторая граница */
                 inset 0 0 0 2px rgb(39, 39, 39); /* Внутренняя граница */
                 scale: 1.05;}
+
+.profil:hover .exitaccount{
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+}
 
 img{user-select: none; -webkit-user-drag: none;}
 
@@ -553,4 +587,124 @@ input[type="search"]::-webkit-search-decoration {
 
 #search-result::-webkit-scrollbar {
     display: none;
+}
+
+/* Toast-уведомления */
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: linear-gradient(135deg, #2a2a2a, #1e1e1e);
+    border: 1px solid rgba(55, 213, 182, 0.6);
+    border-radius: 50px;
+    padding: 14px 28px;
+    color: #e6e3e3;
+    font-family: 'Unbound', monospace;
+    font-size: 16px;
+    font-weight: 500;
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3), 0 0 15px rgba(55, 213, 182, 0.3);
+    backdrop-filter: blur(8px);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.toast-notification.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.toast-notification.error {
+    border-color: rgba(226, 49, 49, 0.8);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3), 0 0 15px rgba(226, 49, 49, 0.3);
+}
+
+.toast-notification.success {
+    border-color: rgba(55, 213, 182, 0.8);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3), 0 0 15px rgba(55, 213, 182, 0.5);
+}
+
+/* Модальное окно подтверждения выхода */
+.logout-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.logout-confirm-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.logout-confirm-modal {
+    background: linear-gradient(135deg, #1e1e1e, #161616);
+    border: 1px solid rgba(55, 213, 182, 0.5);
+    border-radius: 30px;
+    padding: 35px 45px;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(55, 213, 182, 0.3);
+}
+
+.logout-confirm-overlay.active .logout-confirm-modal {
+    transform: scale(1);
+}
+
+.logout-confirm-modal p {
+    color: #e6e3e3;
+    font-family: 'Unbound', monospace;
+    font-size: 22px;
+    margin-bottom: 30px;
+    white-space: nowrap;
+}
+
+.logout-confirm-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.logout-confirm-buttons button {
+    padding: 12px 28px;
+    font-family: 'Unbound', monospace;
+    font-size: 16px;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.logout-confirm-yes {
+    background: linear-gradient(135deg, #e63946, #c1121f);
+    color: white;
+    border: 1px solid rgba(255, 100, 100, 0.5);
+}
+
+.logout-confirm-yes:hover {
+    scale: 1.05;
+    background: linear-gradient(135deg, #ff4757, #e63946);
+    box-shadow: 0 0 15px rgba(230, 57, 70, 0.5);
+}
+
+.logout-confirm-cancel {
+    background: #2a2a2a;
+    color: #e6e3e3;
+    border: 1px solid #4a4a4a;
+}
+
+.logout-confirm-cancel:hover {
+    scale: 1.05;
+    background: #3a3a3a;
+    border-color: #6a6a6a;
 }
