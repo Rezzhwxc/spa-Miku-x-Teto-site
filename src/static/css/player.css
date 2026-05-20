@@ -38,42 +38,7 @@
     100% { opacity: 1; transform: translateY(0); }
 }
 
-/* анимация перехода */
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
 
-@keyframes fadeInText {
-  from { opacity: 0; transform: translateY(3px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-25px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes slideOutLeft {
-  from { opacity: 1; transform: translateX(0); }
-  to { opacity: 0; transform: translateX(-25px); }
-}
-
-.fade-out {
-  animation: fadeOut 0.16s ease forwards;
-}
-
-.fade-in {
-  animation: fadeInText 0.2s ease forwards;
-}
-
-.slide-in-left {
-  animation: slideInLeft 0.15s ease forwards;
-}
-
-.slide-out-left {
-  animation: slideOutLeft 0.16s ease forwards;
-}
 
 /* Кастомный плеер */
 .custom-player {

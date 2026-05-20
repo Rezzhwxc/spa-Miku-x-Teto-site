@@ -11,6 +11,8 @@ overflow-y: hidden;}
     100% { background-position: 0% 50%; }
 }
 
+
+
 .zagol {height: 154px; width: auto;
     border: rgb(52, 52, 52) 2px solid; 
     border-radius: 35px; margin-top: 16px; margin-left: 13px;
@@ -546,7 +548,7 @@ input[type="search"]::-webkit-search-decoration {
 }
 
 .search-title {
-    font-size: 20px;
+    font-size: 22px;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     color: rgba(255, 255, 255, 0.788);
     white-space: nowrap;
@@ -556,7 +558,7 @@ input[type="search"]::-webkit-search-decoration {
 }
 
 .search-artist {
-    font-size: 16px;
+    font-size: 18px;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     color: #8C8C8C;
     margin-top: 4px;

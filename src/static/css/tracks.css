@@ -31,6 +31,10 @@
     transition: all 0.2s ease;
     border-radius: 50%;
 }
+.circul-cover:active {
+    transform: scale(0.95);
+    filter: brightness(0.9);
+}
 
 .circul.playing {
     border-radius: 50%;

@@ -123,6 +123,12 @@
 .circulindex {
     width: 320px;
     height: 320px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.circulindex-cover:active {
+    transform: scale(0.95);
+    filter: brightness(0.9);
 }
 
 .circulindex-cover {
