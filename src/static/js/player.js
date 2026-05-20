@@ -225,37 +225,33 @@ function updatePlayerUI(song, opts = {}) {
     if (!song) return;
 
     const silent = opts.silent === true;
+    const restoreOnly = opts.restoreOnly === true;
     const titleEl = playerElements.title;
     const artistEl = playerElements.artist;
     const coverEl = playerElements.cover;
 
-    if (!silent) {
-        if (!window.playerHydrating) {
-            if (playerElements.currentTime) {
-                playerElements.currentTime.textContent = currentAudio ? formatTime(currentAudio.currentTime || 0) : '0:00';
-            }
-            if (playerElements.progressBar && currentAudio && isFinite(currentAudio.duration) && currentAudio.duration > 0) {
-                const progress = currentAudio.currentTime / currentAudio.duration;
-                playerElements.progressBar.value = progress;
-                playerElements.progressBar.style.setProperty('--progress', `${progress * 100}%`);
-            }
-            if (playerElements.duration && currentAudio && isFinite(currentAudio.duration)) {
-                playerElements.duration.textContent = formatTime(currentAudio.duration);
-            }
-        }
+    if (restoreOnly) {
+        if (titleEl) titleEl.textContent = song.name || '—';
+        if (artistEl) artistEl.textContent = song.vocaloid_name || 'Vocaloid';
+        if (coverEl) coverEl.src = song.photo ? `/photo/${song.photo}` : '/static/img/default-cover.png';
+        if (playerElements.nowPlayingBar) playerElements.nowPlayingBar.style.display = 'block';
+        if ('mediaSession' in navigator) updateMediaSession(song);
+        updateNavButtons(song);
+        syncGlobals();
+        return;
     }
 
     titleEl?.classList.remove('fade-out', 'fade-in');
     artistEl?.classList.remove('fade-out', 'fade-in');
     coverEl?.classList.remove('slide-out-left', 'slide-in-left');
 
-    void coverEl?.offsetHeight;
+    void titleEl?.offsetWidth;
+    void artistEl?.offsetWidth;
+    void coverEl?.offsetWidth;
 
-    if (!silent) {
-        titleEl?.classList.add('fade-out');
-        artistEl?.classList.add('fade-out');
-        coverEl?.classList.add('slide-out-left');
-    }
+    titleEl?.classList.add('fade-out');
+    artistEl?.classList.add('fade-out');
+    coverEl?.classList.add('slide-out-left');
 
     setTimeout(() => {
         if (titleEl) titleEl.textContent = song.name || '—';
@@ -266,21 +262,22 @@ function updatePlayerUI(song, opts = {}) {
         artistEl?.classList.remove('fade-out');
         coverEl?.classList.remove('slide-out-left');
 
-        if (!silent) {
-            titleEl?.classList.add('fade-in');
-            artistEl?.classList.add('fade-in');
-            coverEl?.classList.add('slide-in-left');
+        void titleEl?.offsetWidth;
+        void artistEl?.offsetWidth;
+        void coverEl?.offsetWidth;
 
-            setTimeout(() => {
-                titleEl?.classList.remove('fade-in');
-                artistEl?.classList.remove('fade-in');
-                coverEl?.classList.remove('slide-in-left');
-            }, 220);
-        }
-    }, silent ? 0 : 160);
+        titleEl?.classList.add('fade-in');
+        artistEl?.classList.add('fade-in');
+        coverEl?.classList.add('slide-in-left');
+
+        setTimeout(() => {
+            titleEl?.classList.remove('fade-in');
+            artistEl?.classList.remove('fade-in');
+            coverEl?.classList.remove('slide-in-left');
+        }, 220);
+    }, 160);
 
     if (playerElements.nowPlayingBar) playerElements.nowPlayingBar.style.display = 'block';
-
     if ('mediaSession' in navigator) updateMediaSession(song);
 
     updateNavButtons(song);
@@ -294,7 +291,7 @@ function restorePlayerUI() {
     if (!song) return;
 
     window.playerHydrating = true;
-    updatePlayerUI(song, { silent: true });
+    updatePlayerUI(song, { restoreOnly: true });
     highlightActiveSong(window.currentSongId);
     updateCirculIcon(window.currentSongId, !currentAudio?.paused);
 
@@ -315,6 +312,7 @@ function playSongById(songId, autoPlay = true) {
     const song = songsList.find(s => s.id == songId);
     if (!song) return;
     if (!currentAudio) initAudio();
+    updatePlayerUI(song);
 
     if (currentSongId != songId) {
         resetAllCirculIcons();
