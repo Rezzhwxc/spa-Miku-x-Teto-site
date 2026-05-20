@@ -296,6 +296,8 @@ function initIndex() {
 
 function initTracks() {
     log('initTracks');
+    // Сбрасываем фильтр персонажа — на треках должны играть все треки подряд
+    window.currentCharacterFilter = null;
 }
 
 function initBio() {
