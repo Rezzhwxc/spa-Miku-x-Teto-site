@@ -709,3 +709,12 @@ input[type="search"]::-webkit-search-decoration {
     background: #2f2f2f;
     border-color: #6a6a6a;
 }
+
+/* Общие классы анимаций */
+.startstop-click-animation,
+.play-click-animation,
+.volume-click-animation,
+.repeat-click-animation,
+.like-click-animation {
+    animation: click 0.2s ease;
+}

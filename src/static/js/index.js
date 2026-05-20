@@ -154,6 +154,7 @@ function initCirculindex() {
             }
             const playHandler = (e) => {
                 e.stopPropagation();
+                addAnimation(btn, 'startstop-click-animation');
                 filterByCharacter(charId);
             };
             btn._indexPlayHandler = playHandler;

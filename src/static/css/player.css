@@ -271,7 +271,7 @@
 }
 
 .progress-slider::-webkit-slider-runnable-track {
-    background: linear-gradient(to right, #10dfd8e2 0%, #de1717 var(--progress, 0%), rgba(255, 255, 255, 0.24) var(--progress, 0%));
+    background: linear-gradient(to right, #10dfd8bc 0%, #de1717c6 var(--progress, 0%), rgba(255, 255, 255, 0.24) var(--progress, 0%));
 }
 
 .progress-slider::-moz-range-progress {
@@ -381,15 +381,6 @@
 .repeat-mode-btn.active-one,
 .repeat-mode-btn.active-random {
     opacity: 1;
-}
-
-/* Общие классы анимаций */
-.startstop-click-animation,
-.play-click-animation,
-.volume-click-animation,
-.repeat-click-animation,
-.like-click-animation {
-    animation: click 0.2s ease;
 }
 
 button:focus,

@@ -200,6 +200,7 @@
     height: 75px;
     border-radius: 50%;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .startstop .icon {
@@ -210,6 +211,16 @@
 .startstop:hover {
     background-color: rgb(232, 232, 232);
     scale: 1.055;
+}
+
+.startstop:active {
+    transform: scale(0.94);
+    filter: brightness(0.9);
+}
+
+.startstop.pressed {
+    transform: scale(0.94);
+    filter: brightness(0.9);
 }
 
 #avatar {
