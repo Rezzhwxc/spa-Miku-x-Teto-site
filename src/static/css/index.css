@@ -44,7 +44,7 @@
     -ms-overflow-style: none;
 }
 
-.content{
+#content{
     height: 100%;
     display: flex;
     justify-content: center;
@@ -57,18 +57,18 @@
     animation: blur 1.8s ease infinite;
 }
 
-.likes {
+#likes {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 20px;
     z-index: 10;
 }
-.likes img{
+#likes img{
     cursor: pointer;
     transition: all 0.2s ease;
 }
-.likes img:hover{
+#likes img:hover{
     scale: 0.9;
     opacity: 0.85;
 }
@@ -112,7 +112,7 @@
     font-family: 'unbound';
 }
 
-.circuls{
+#circuls{
     margin: 20px;
     display: flex;
     height: 500px;
@@ -229,7 +229,7 @@
     filter: brightness(0.9);
 }
 
-#avatar {
+#navbar {
     position: absolute;
     top: 0px;
     right: 0px;
@@ -238,13 +238,12 @@
     padding: 10px;
 
     display: flex;
-    align-items: center;
     gap: 25px;
 }
 
-#avatar img {
-    width: 130px;
-    height: 130px;
+#avatar{
+    width: 135px;
+    height: 135px;
     border-radius: 40%;
     object-fit: cover;
     transition: all 0.2s ease;
@@ -253,17 +252,17 @@
     margin: 20px;
     margin-bottom: 10px;
 }
-#avatar img:hover {
+#avatar:hover {
     scale: 1.05;
     box-shadow: 0px 0px 15px 0px rgba(255, 255, 255, 0.5);
 }
 
-#avatar:hover p {
+.hover:hover .soob {
     transform: translateY(0);
     opacity: 1;
 }
 
-#avatar p {
+.soob{
     font-family: 'unbound';
     color: #ffffffcc;
     font-size: 18px;
@@ -275,4 +274,106 @@
 
     transform: translateY(-40px);
     opacity: 0;
+}
+
+/* навигационные кнопки для скролла */
+
+.navindex{
+    position: fixed;
+    right: 230px;
+    display: flex;
+    gap: 54px;
+    padding: 25px 20px;
+    height: fit-content;
+
+    color: #fffdfdec;
+    font-size: 24px;
+    font-family: 'unbound';
+    font-weight: 1000;
+    user-select: none;
+    z-index: 1000;
+    
+    transition: all 0.27s ease;
+}
+
+.navindex p.active {
+    border-bottom: 2px solid #dfdfdf;
+    padding-bottom: 2px;
+    transform: scale(1.02);
+    transition: all 0.1s ease;
+}
+.navindex.scrolled{
+    right: 80px;
+}
+
+.nav1, .nav2, .nav3 {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.nav1:hover, .nav2:hover, .nav3:hover {
+    color: #ffffffcc;
+    scale: 1.05;
+}
+
+/* content 3 - about us */
+
+#content3{
+    height: fit-content;
+    margin-top: 120px;
+}
+
+.word-container2 {
+    text-align: center;
+    height: 50px; 
+    overflow: hidden;
+    user-select: none;
+}
+.word-stack2 {
+    position: relative;
+    animation: slideWords 3.5s infinite ease-in-out;
+}
+.word-ru2, .word-en2 {
+    display: block;
+    font-size: 42px;
+    color: #fffdfde1;
+    font-family: 'unbound';
+    font-weight: 800;
+    white-space: nowrap;
+    height: 50px;
+    line-height: 1.3;
+}
+
+
+/* footer */
+
+footer{
+    border-top: 2px solid rgba(55, 213, 182, 0.8);
+    padding-top: 20px;
+}
+
+.mark{
+    text-align: center;
+    margin: 5px;
+    color: #fffdfdb4;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 15px;
+    user-select: none;
+}
+
+#navfooter{
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 30px;
+}
+#navfooter a{
+    font-family: 'unbound';
+    color: #fffdfdcc;
+    font-size: 22px;
+    text-decoration-line: none;
+    transition: all 0.2s ease;
+    margin: 3px;
+}
+#navfooter a:hover{
+    scale: 1.1;
+    color: #FFFDFD;
 }

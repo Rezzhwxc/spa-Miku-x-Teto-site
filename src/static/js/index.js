@@ -131,6 +131,10 @@ function initCirculindex() {
 
     console.log('[INDEX] Инициализация circulindex');
 
+    initNavScroll();
+    initNavStickyToCorner();
+    
+
     circuls.forEach(circul => {
         const charId = circul.dataset.character;
         setCirculCover(circul, charId);
@@ -183,6 +187,123 @@ function refreshCirculsUI() { initCirculindex(); }
 // ==================== СИНХРОНИЗАЦИЯ ИКОНОК ПРИ СМЕНЕ ТРЕКА ====================
 
 document.addEventListener('playStateChanged', updateAllCirculPlayIcons);
+
+// ==================== НАВИГАЦИЯ ПО СТРАНИЦЕ (ПРОКРУТКА) ====================
+
+function initNavScroll() {
+    const navItems = document.querySelectorAll('.navindex p');
+    const scrollBox = document.querySelector('.scroll-box');
+    
+    if (!navItems.length || !scrollBox) return;
+    
+    // Удаляем старые обработчики
+    navItems.forEach(item => {
+        if (item._scrollHandler) {
+            item.removeEventListener('click', item._scrollHandler);
+        }
+        
+        const handler = () => {
+            const targetId = item.dataset.target;
+            const target = document.getElementById(targetId);
+            if (!target) return;
+            
+            const offsetTop = target.offsetTop - 80;
+            scrollBox.scrollTo({
+                top: offsetTop,
+                behavior: 'smooth'
+            });
+            
+            // Через небольшую задержку после прокрутки обновим активный пункт
+            setTimeout(() => {
+                updateActiveNavItem();
+            }, 500);
+        };
+        
+        item._scrollHandler = handler;
+        item.addEventListener('click', handler);
+    });
+    
+    // ★ Добавляем обработчик скролла ★
+    scrollBox.removeEventListener('scroll', updateActiveNavItem);
+    scrollBox.addEventListener('scroll', updateActiveNavItem);
+    
+    // ★ Первоначальное обновление ★
+    updateActiveNavItem();
+}
+
+// ==================== ОБНОВЛЕНИЕ АКТИВНОГО ПУНКТА НАВИГАЦИИ ====================
+
+function updateActiveNavItem() {
+    const scrollBox = document.querySelector('.scroll-box');
+    const navItems = document.querySelectorAll('.navindex p');
+    if (!scrollBox || !navItems.length) return;
+
+    const scrollTop = scrollBox.scrollTop;
+    const viewportMiddle = scrollTop + scrollBox.clientHeight / 3; // верхняя треть
+
+    let activeId = null;
+
+    const sections = [
+        { id: 'content1', navIndex: 0 },
+        { id: 'content2', navIndex: 1 },
+        { id: 'content3', navIndex: 2 }
+    ];
+
+    for (let i = 0; i < sections.length; i++) {
+        const section = document.getElementById(sections[i].id);
+        if (section) {
+            const sectionTop = section.offsetTop;
+            const sectionBottom = sectionTop + section.offsetHeight;
+            if (viewportMiddle >= sectionTop && viewportMiddle < sectionBottom) {
+                activeId = sections[i].navIndex;
+                break;
+            }
+        }
+    }
+
+    // Если ни один не попал (в самом верху) — активен первый
+    if (activeId === null && scrollTop < 50) activeId = 0;
+    // Если в самом низу — активен последний
+    if (activeId === null && scrollTop + scrollBox.clientHeight >= scrollBox.scrollHeight - 50) activeId = 2;
+
+    navItems.forEach((item, idx) => {
+        if (idx === activeId) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+}
+
+// ==================== ПРИЛИПАНИЕ НАВИГАЦИИ К УГЛУ ====================
+function initNavStickyToCorner() {
+    const scrollBox = document.querySelector('.scroll-box');
+    const nav = document.querySelector('.navindex');
+    if (!scrollBox || !nav) return;
+
+    let ticking = false;
+    const handleScroll = () => {
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                const scrollTop = scrollBox.scrollTop;
+                if (scrollTop > 200) {
+                    nav.classList.add('scrolled');
+                } else {
+                    nav.classList.remove('scrolled');
+                }
+                ticking = false;
+            });
+            ticking = true;
+        }
+    };
+
+    if (scrollBox._navStickyHandler) {
+        scrollBox.removeEventListener('scroll', scrollBox._navStickyHandler);
+    }
+    scrollBox._navStickyHandler = handleScroll;
+    scrollBox.addEventListener('scroll', handleScroll);
+    handleScroll(); // вызвать один раз для начального состояния
+}
 
 // ==================== ЭКСПОРТ ====================
 
