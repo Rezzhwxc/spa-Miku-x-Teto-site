@@ -390,7 +390,7 @@ function playPrevSong() {
 
     setTimeout(() => {
         songNavLock = false;
-    }, 333);
+    }, 300);
 
     if (playMode === 2) {
         if (!originalSongsList.length) return;

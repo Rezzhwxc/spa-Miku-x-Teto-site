@@ -26,7 +26,7 @@
     justify-self: center;
     color: rgb(26, 202, 202); 
     text-shadow: 2px 2px 4px rgb(11, 151, 121); 
-    transition: all 0.35s ease;}
+    transition: all 0.25s ease;}
 .boxup p:hover{
     text-shadow: 2px 2px 4px rgba(20, 204, 164, 0.856);
     scale: 1.05;
@@ -240,10 +240,44 @@ li{
 
 
 .end{
-    margin: 60px 260px;
+    margin: 60px 260px; margin-bottom: 20px;
     color: rgb(13, 204, 179); text-shadow: 2px 2px 5px rgba(31, 216, 176, 0.774);
     text-align: center;  line-height: 1.4; font-size: 21px;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 a{cursor: pointer;}
+
+#traveltracks{
+    display: block;
+    margin: 40px auto;
+    padding: 20px 15px;
+    padding: 20px 15px;
+    width: 60%;
+    border-radius: 30px;
+    outline: none;
+    border: 1px solid rgba(26, 202, 202, 0.781);
+    box-shadow: 2px 2px 5px rgba(11, 151, 121, 0.733), 
+    -2px -2px 5px rgba(11, 151, 121, 0.733);
+    background: linear-gradient(90deg, rgb(40, 39, 39), rgb(31, 30, 30), rgb(40, 39, 39));
+    transition: all 0.2s ease;
+}
+#traveltracks:hover{
+    box-shadow: 5px 5px 12px rgba(11, 151, 121, 0.733), 
+    -5px -5px 12px rgba(11, 151, 121, 0.733);
+    background: linear-gradient(90deg, rgb(31, 30, 30), rgb(46, 45, 45), rgb(31, 30, 30));
+    scale: 1.03;
+}
+#traveltracks:active{
+    scale: 1;
+    filter: brightness(0.9);
+}
+
+#traveltracks p{
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.8);
+    font-family: 'unbound';
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
