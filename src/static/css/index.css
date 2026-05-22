@@ -178,7 +178,7 @@
     animation: gradient 2s ease infinite;
 }
 .txtindex:hover .sp2{
-    background: linear-gradient(50deg, #00ffff, rgba(196, 32, 32, 0.911), #00ffff);
+    background: linear-gradient(50deg, #00ffff, rgba(196, 32, 32, 0.6), #00ffff);
     background-size: 200% 200%;
     -webkit-background-clip: text;
     background-clip: text;
@@ -186,7 +186,7 @@
     animation: gradient 2.4s ease infinite;
 }
 .txtindex:hover .sp3{
-    background: linear-gradient(50deg, rgb(196, 32, 32), #9c9c9ce9, rgba(196, 32, 32, 0.911));
+    background: linear-gradient(50deg, rgb(196, 32, 32), #c6c6c6e9, rgba(196, 32, 32, 0.911));
     background-size: 200% 200%;
     -webkit-background-clip: text;
     background-clip: text;

@@ -246,6 +246,21 @@ async function navigateTo(path, pushState = true) {
                         initSearch();
                 }
             }
+                const scrollToContent2 = sessionStorage.getItem('scrollToContent2');
+                if (scrollToContent2 === 'true') {
+                    sessionStorage.removeItem('scrollToContent2');
+                    setTimeout(() => {
+                        const target = document.getElementById('content2');
+                        const scrollBox = document.querySelector('.scroll-box');
+                        if (target && scrollBox) {
+                            const offsetTop = target.offsetTop - 80;
+                            scrollBox.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                            console.log('[SPA] Прокрутка к #content2 выполнена');
+                        } else {
+                            console.warn('[SPA] Не найдены #content2 или .scroll-box');
+                        }
+                    }, 200); // задержка, чтобы DOM точно отрисовался
+                }
         }, 100);
     } else if (path === '/tracks') {
     setTimeout(async () => {
@@ -319,13 +334,31 @@ function initBio() {
 }
 
 function initBioMiku() { 
-    log('initBioMiku'); 
+    log('initBioMiku');
+    // Кнопка перехода к трекам
+    const travelBtn = document.querySelector('#traveltracks');
+    if (travelBtn) {
+        travelBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            sessionStorage.setItem('scrollToContent2', 'true');
+            navigateTo('/index');
+        });
+    }
 }
 
 function initBioTeto() {
     log('initBioTeto');
     const v = appView.querySelector('#song');
     if (v) v.volume = 0.17;
+    // Кнопка перехода к трекам
+    const travelBtn = document.querySelector('#traveltracks');
+    if (travelBtn) {
+        travelBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            sessionStorage.setItem('scrollToContent2', 'true');
+            navigateTo('/index');
+        });
+    }
 }
 
 
