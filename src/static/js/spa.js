@@ -16,6 +16,7 @@ const ROUTES = {
     '/bio':      { fragment: 'bio',      css: 'bio.css',      title: 'Miku x Teto - биография', contentClass: 'scroll-box',     extraBoxClass: null,   js: initBio },
     '/bio-miku': { fragment: 'bio-miku', css: 'bio-miku.css', title: 'Miku - биография',        contentClass: 'scroll-boxmiku', extraBoxClass: 'boxup',  js: initBioMiku },
     '/bio-teto': { fragment: 'bio-teto', css: 'bio-teto.css', title: 'Teto - биография',        contentClass: 'scroll-boxteto', extraBoxClass: 'boxup',  js: initBioTeto },
+    '/profile':  { fragment: 'profile',  css: 'profile.css',  title: 'Miku x Teto - profile',   contentClass: 'scroll-box',     extraBoxClass: null, js: initProfile},
 };
 
 
@@ -313,6 +314,10 @@ function initTracks() {
     log('initTracks');
     // Сбрасываем фильтр персонажа — на треках должны играть все треки подряд
     window.currentCharacterFilter = null;
+}
+
+function initProfile() {
+    log('initProfile');
 }
 
 function initBio() {

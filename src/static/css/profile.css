@@ -1,0 +1,98 @@
+*{
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+ .scroll-box{
+    background: linear-gradient(135deg,
+        rgb(31, 30, 30) 14%,
+        rgb(45, 44, 44) 35%,
+        #313131 50%,
+        rgb(45, 44, 44) 75%,
+        rgb(31, 30, 30) 100%);
+    background-size: 220% 220%;
+    animation: boxGradientMove 5s ease-in-out infinite alternate;
+}
+
+@keyframes boxGradientMove {
+    0% {
+        background-position: 0% 0%;
+    }
+    50% {
+        background-position: 100% 40%;
+    }
+    100% {
+        background-position: 0% 100%;
+    }
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    position: relative;
+    justify-content: center;
+    vertical-align: middle;
+}
+#nickname {
+    user-select: none;
+    font-size: 28px;
+    font-family: 'unbound';
+    font-weight: 600;
+    text-align: center;
+    margin-top: 30px;
+    text-transform: uppercase;
+    color: #EAEAEA;
+    letter-spacing: 2px;
+}
+#edit-nickname {
+    margin: 30px 10px 0px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+#edit-nickname:hover {
+    filter: brightness(0.9);
+    scale: 1.15;
+}
+#edit-nickname:active {
+    filter: brightness(0.85);
+    scale: 0.95;
+}
+
+/* back */
+
+.back {
+    position: absolute;
+    right: 30px;
+    top: 30px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 260px;
+    height: 60px;
+    background: rgba(35, 35, 35, 0.74);
+    color: #DFDFDF;
+    border-radius: 30px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+.back p{
+    font-size: 19px;
+    font-family: 'unbound';
+    letter-spacing: 1px;
+    user-select: none;
+}
+
+.back:hover {
+    scale: 1.07;
+    box-shadow: 0px 0px 15px 0px rgb(58, 58, 58);
+}
+.back:active {
+    scale: 1;
+    filter: brightness(0.9);
+}

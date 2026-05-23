@@ -33,6 +33,7 @@ def get_db_connection():
 @app.route('/bio')
 @app.route('/bio-miku')
 @app.route('/bio-teto')
+@app.route('/profile')
 def spa_shell():
     return render_template('spa.html')
 
@@ -44,6 +45,7 @@ FRAGMENT_FILES = {
     'bio':      'bio.html',
     'bio-miku': 'bio-miku.html',
     'bio-teto': 'bio-teto.html',
+    'profile':  'profile.html',
 }
 
 @app.route('/api/fragment/<page>')
@@ -146,10 +148,6 @@ def play_song(song_id):
 
 
 if __name__ == '__main__':
-    print(f"[INFO] THIS_DIR:      {THIS_DIR}")
-    print(f"[INFO] TEMPLATES_DIR: {TEMPLATES_DIR}")
-    print(f"[INFO] MUSIC_FOLDER:  {MUSIC_FOLDER}")
-    print(f"[INFO] PHOTO_FOLDER:  {PHOTO_FOLDER}")
     # Print which template files actually exist
     for name, fname in FRAGMENT_FILES.items():
         path = os.path.join(TEMPLATES_DIR, fname)
