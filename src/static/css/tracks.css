@@ -87,7 +87,7 @@
 
 /* Заголовок */
 h1 {
-    border-radius: 15px;
+    border-radius: 25px;
     margin: 20px 110px;
     margin-top: -10px;
     box-shadow: 0 0 24px 0px rgba(224, 224, 224, 0.064);
@@ -105,7 +105,7 @@ h1 {
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     letter-spacing: 3px;
     user-select: none;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 h1:hover {

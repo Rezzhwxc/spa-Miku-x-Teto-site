@@ -242,9 +242,9 @@
 }
 
 #avatar{
-    width: 135px;
-    height: 135px;
-    border-radius: 40%;
+    width: 140px;
+    height: 140px;
+    border-radius: 45%;
     object-fit: cover;
     transition: all 0.2s ease;
     cursor: pointer;
