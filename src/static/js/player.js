@@ -313,9 +313,16 @@ function restorePlayerUI() {
     });
 }
 
-function playSongById(songId, autoPlay = true) {
+function playSongById(songId, autoPlay = true, fromFavorites = false) {
     const song = songsList.find(s => s.id == songId);
     if (!song) return;
+    
+    // ★ Сброс режима избранного, если трек запущен не из избранного списка ★
+    if (!fromFavorites) {
+        window.isPlayingFromFavorites = false;
+        window.currentFavoriteList = [];
+    }
+    
     if (!currentAudio) initAudio();
     updatePlayerUI(song);
 
@@ -334,23 +341,17 @@ function playSongById(songId, autoPlay = true) {
     updatePlayerUI(song, { silent: !shouldAnimate });
 
     if (autoPlay) {
-        // Функция для воспроизведения с разблокировкой
         const attemptPlay = () => {
             currentAudio.play().catch(async (e) => {
                 console.log('Автовоспроизведение заблокировано, разблокируем AudioContext...');
-                
-                // Разблокируем AudioContext
                 if (audioContext && audioContext.state === 'suspended') {
                     await audioContext.resume();
                 }
-                
-                // Пробуем снова
                 try {
                     await currentAudio.play();
                     console.log('Воспроизведение успешно после разблокировки');
                 } catch (err) {
                     console.log('Плеер будет ждать клика пользователя');
-                    // Показываем сообщение пользователю
                     if (playerElements.title) {
                         const originalTitle = playerElements.title.textContent;
                         playerElements.title.textContent = 'кликните для воспроизведения';
@@ -361,18 +362,11 @@ function playSongById(songId, autoPlay = true) {
                 }
             });
         };
-        
-        // Если AudioContext приостановлен, сначала разблокируем
         if (audioContext && audioContext.state === 'suspended') {
-            audioContext.resume().then(() => {
-                attemptPlay();
-            }).catch(() => {
-                attemptPlay();
-            });
+            audioContext.resume().then(() => attemptPlay()).catch(() => attemptPlay());
         } else {
             attemptPlay();
         }
-        
         updateCirculIcon(songId, true);
         if (playerElements.playPauseImg) playerElements.playPauseImg.src = '/static/img/pause-button.png';
     }
@@ -420,7 +414,7 @@ function playPrevSong() {
             if (prevIndex < 0) prevIndex = favorites.length - 1;
             prevSong = favorites[prevIndex];
         }
-        if (prevSong) playSongById(prevSong.id, true);
+        if (prevSong) playSongById(prevSong.id, true, true);
         syncGlobals();
         return;
     }
@@ -466,7 +460,7 @@ function playPrevSong() {
     }
 
     const prevSong = availableSongs[prevIndex];
-    if (prevSong) playSongById(prevSong.id, true);
+    if (prevSong) playSongById(prevSong.id, true, true);
     syncGlobals();
 }
 
@@ -476,9 +470,9 @@ function playNextSong() {
 
     setTimeout(() => {
         songNavLock = false;
-    }, 333);
+    }, 300);
 
-        // Режим избранного
+            // Режим избранного
     if (window.isPlayingFromFavorites && window.currentFavoriteList.length) {
         const favorites = window.currentFavoriteList;
         if (playMode === 1) {
@@ -506,7 +500,7 @@ function playNextSong() {
             if (nextIndex >= favorites.length) nextIndex = 0;
             nextSong = favorites[nextIndex];
         }
-        if (nextSong) playSongById(nextSong.id, true);
+        if (nextSong) playSongById(nextSong.id, true, true);
         syncGlobals();
         return;
     }

@@ -35,13 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
 
     if (savedEmail && savedUserId && isLoggedIn) {
-        const regBtn = document.getElementById('regjs');
-        if (regBtn) {
-            const savedName = localStorage.getItem('user_name');
-            const displayName = savedName || savedEmail.split('@')[0];
-            regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">' + displayName;
-        }
+    const regBtn = document.getElementById('regjs');
+    if (regBtn) {
+        const savedName = localStorage.getItem('user_name');
+        const displayName = savedName || savedEmail.split('@')[0];
+        regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">' + displayName;
     }
+}
 
     function validateEmail(email) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

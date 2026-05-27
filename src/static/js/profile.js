@@ -386,17 +386,15 @@ async function handleDeleteConfirm() {
         const currentSong = getSongs().find(s => s.id == window.currentSongId);
 
         if (!songId) return;
-        btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            // Проверяем, играет ли уже этот трек
             const currentSong = songsList.find(s => s.id == window.currentSongId);
             if (currentSong && currentSong.id == songId && window.currentAudio && !window.currentAudio.paused) {
                 window.togglePlayPause();
             } else {
-                // Включаем режим избранного
                 window.isPlayingFromFavorites = true;
                 window.currentFavoriteList = [...favoriteSongsList];
-                window.playSongById(songId, true);
+                window.playSongById(songId, true, true);   // ← добавлен третий параметр
             }
             setTimeout(() => refreshProfilePlayIcons(), 200);
         });
@@ -413,7 +411,7 @@ async function handleDeleteConfirm() {
             } else {
                 window.isPlayingFromFavorites = true;
                 window.currentFavoriteList = [...favoriteSongsList];
-                window.playSongById(songId, true);
+                window.playSongById(songId, true, true);
             }
             setTimeout(() => refreshProfilePlayIcons(), 200);
         });
