@@ -318,6 +318,9 @@ function initTracks() {
 
 function initProfile() {
     log('initProfile');
+    if (typeof window.runProfilePage === 'function') {
+        window.runProfilePage();
+    }
 }
 
 function initBio() {

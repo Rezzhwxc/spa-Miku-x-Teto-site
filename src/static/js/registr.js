@@ -1,3 +1,22 @@
+// ★ ГЛОБАЛЬНАЯ ФУНКЦИЯ ДЛЯ ВСПЛЫВАЮЩИХ УВЕДОМЛЕНИЙ ★
+window.showToast = function(message, type = 'success') {
+    const oldToast = document.querySelector('.toast-notification');
+    if (oldToast) oldToast.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = `toast-notification ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            if (toast.parentNode) toast.remove();
+        }, 300);
+    }, 2800);
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     const regBtn = document.getElementById('regjs');
 
@@ -12,38 +31,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ★ ВОССТАНОВЛЕНИЕ СЕССИИ ПРИ ЗАГРУЗКЕ ★
     const savedEmail = localStorage.getItem('user_email');
+    const savedUserId = localStorage.getItem('user_id');
     const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
 
-    if (savedEmail && isLoggedIn) {
+    if (savedEmail && savedUserId && isLoggedIn) {
         const regBtn = document.getElementById('regjs');
         if (regBtn) {
-            regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">' + savedEmail.split('@')[0];
+            const savedName = localStorage.getItem('user_name');
+            const displayName = savedName || savedEmail.split('@')[0];
+            regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">' + displayName;
         }
     }
-
-    // ★ ФУНКЦИЯ ДЛЯ ВСПЛЫВАЮЩИХ УВЕДОМЛЕНИЙ ★
-    function showToast(message, type = 'success') {
-        const oldToast = document.querySelector('.toast-notification');
-        if (oldToast) {
-            oldToast.remove();
-        }
-        
-        const toast = document.createElement('div');
-        toast.className = `toast-notification ${type}`;
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.classList.add('show');
-        }, 10);
-        
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => {
-                if (toast.parentNode) toast.remove();
-            }, 300);
-        }, 2800);
-    }   
 
     function validateEmail(email) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -55,14 +53,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeOverlay(overlay, immediate = false) {
         if (!overlay) return;
-
         overlay.classList.remove('active');
-
         if (immediate) {
             overlay.style.display = 'none';
             return;
         }
-
         setTimeout(() => {
             overlay.style.display = 'none';
         }, 300);
@@ -75,13 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openLoginModal() {
         if (!loginOverlay) return;
-
         if (registerOverlay && registerOverlay.style.display === 'flex') {
             closeOverlay(registerOverlay, true);
         }
-
         if (loginOverlay.style.display === 'flex' && loginOverlay.classList.contains('active')) return;
-
         loginOverlay.style.display = 'flex';
         requestAnimationFrame(() => {
             loginOverlay.classList.add('active');
@@ -90,13 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openRegisterModal() {
         if (!registerOverlay) return;
-
         if (loginOverlay && loginOverlay.style.display === 'flex') {
             closeOverlay(loginOverlay, true);
         }
-
         if (registerOverlay.style.display === 'flex' && registerOverlay.classList.contains('active')) return;
-
         registerOverlay.style.display = 'flex';
         requestAnimationFrame(() => {
             registerOverlay.classList.add('active');
@@ -107,82 +96,82 @@ document.addEventListener('DOMContentLoaded', () => {
     if (registerOverlay) registerOverlay.style.display = 'none';
 
     if (regBtn) {
-        regBtn.addEventListener('click', () => {
-            openLoginModal();
-        });
+        regBtn.addEventListener('click', () => openLoginModal());
     }
-
     if (openRegisterBtn) {
-        openRegisterBtn.addEventListener('click', () => {
-            openRegisterModal();
-        });
+        openRegisterBtn.addEventListener('click', () => openRegisterModal());
     }
-
     if (backToLoginBtn) {
-        backToLoginBtn.addEventListener('click', () => {
-            openLoginModal();
-        });
+        backToLoginBtn.addEventListener('click', () => openLoginModal());
     }
 
     function setupBackdropClose(overlay) {
         if (!overlay) return;
-
         overlay.addEventListener('mousedown', (e) => {
-            if (e.target === overlay) {
-                hideAllModals();
-            }
+            if (e.target === overlay) hideAllModals();
         });
     }
 
     setupBackdropClose(loginOverlay);
     setupBackdropClose(registerOverlay);
-
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') hideAllModals();
     });
 
+    // ========== ЛОГИН ==========
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const email = loginForm.querySelector('input[name="email"]')?.value.trim();
+            const email = loginForm.querySelector('input[name="email"]')?.value.trim().toLowerCase();
             const password = loginForm.querySelector('input[name="password"]')?.value;
 
             if (!email || !password) {
                 showToast('Заполни email и пароль', 'error');
                 return;
             }
-
             if (!validateEmail(email)) {
                 showToast('Введите корректный email', 'error');
                 return;
             }
-
             if (!validatePassword(password)) {
                 showToast('Пароль должен быть минимум 6 символов', 'error');
                 return;
             }
 
-            localStorage.setItem('user_email', email);
-            localStorage.setItem('is_logged_in', 'true');
-
-            console.log('Логин:', { email, password });
-            showToast('Добро пожаловать, ' + email.split('@')[0], 'success');
-            
-            hideAllModals();
-            
-            const regBtn = document.getElementById('regjs');
-            if (regBtn) {
-                regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">' + email.split('@')[0];
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    localStorage.setItem('user_email', data.email);
+                    localStorage.setItem('user_id', data.user_id);
+                    localStorage.setItem('user_name', data.name || '');
+                    localStorage.setItem('is_logged_in', 'true');
+                    showToast('Добро пожаловать, ' + (data.name || email.split('@')[0]), 'success');
+                    hideAllModals();
+                    const regBtn = document.getElementById('regjs');
+                    if (regBtn) {
+                        const displayName = data.name || email.split('@')[0];
+                        regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">' + displayName;
+                    }
+                } else {
+                    showToast(data.error || 'Ошибка входа', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Ошибка соединения с сервером', 'error');
             }
         });
     }
 
+    // ========== РЕГИСТРАЦИЯ ==========
     if (registerForm) {
-        registerForm.addEventListener('submit', (e) => {
+        registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const email = registerForm.querySelector('input[name="email"]')?.value.trim();
+            const email = registerForm.querySelector('input[name="email"]')?.value.trim().toLowerCase();
             const password = registerForm.querySelector('input[name="password"]')?.value;
             const confirmPassword = registerForm.querySelector('input[name="confirm-password"]')?.value;
 
@@ -190,33 +179,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Заполни все поля', 'error');
                 return;
             }
-
             if (!validateEmail(email)) {
                 showToast('Введите корректный email', 'error');
                 return;
             }
-
             if (!validatePassword(password)) {
                 showToast('Пароль должен быть минимум 6 символов', 'error');
                 return;
             }
-
             if (password !== confirmPassword) {
                 showToast('Пароли не совпадают', 'error');
                 return;
             }
 
-            localStorage.setItem('user_email', email);
-            localStorage.setItem('is_logged_in', 'true');
+            const tempName = email.split('@')[0];
 
-            console.log('Регистрация:', { email, password });
-            showToast('Регистрация успешна! Добро пожаловать, ' + email.split('@')[0] + '! 🎉', 'success');
-            
-            hideAllModals();
-            
-            const regBtn = document.getElementById('regjs');
-            if (regBtn) {
-                regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">' + email.split('@')[0];
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, name: tempName })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    localStorage.setItem('user_email', email);
+                    localStorage.setItem('user_id', data.user_id);
+                    localStorage.setItem('user_name', tempName);
+                    localStorage.setItem('is_logged_in', 'true');
+                    showToast('Успешно! Добро пожаловать, ' + tempName + '^^', 'success');
+                    hideAllModals();
+                    const regBtn = document.getElementById('regjs');
+                    if (regBtn) {
+                        regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">' + tempName;
+                    }
+                } else {
+                    showToast(data.error || 'Ошибка регистрации', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Ошибка соединения с сервером', 'error');
             }
         });
     }
@@ -224,6 +225,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ★ ФУНКЦИЯ ВЫХОДА ИЗ АККАУНТА ★
     function logoutUser() {
         localStorage.removeItem('user_email');
+        localStorage.removeItem('user_id');
+        localStorage.removeItem('user_name');
         localStorage.removeItem('is_logged_in');
         
         const regBtn = document.getElementById('regjs');
@@ -281,25 +284,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (logoutConfirmYes) {
-        logoutConfirmYes.addEventListener('click', () => {
-            logoutUser();
-        });
+        logoutConfirmYes.addEventListener('click', () => logoutUser());
     }
-
     if (logoutConfirmCancel) {
-        logoutConfirmCancel.addEventListener('click', () => {
-            hideLogoutConfirm();
-        });
+        logoutConfirmCancel.addEventListener('click', () => hideLogoutConfirm());
     }
-
     if (logoutOverlay) {
         logoutOverlay.addEventListener('click', (e) => {
-            if (e.target === logoutOverlay) {
-                hideLogoutConfirm();
-            }
+            if (e.target === logoutOverlay) hideLogoutConfirm();
         });
     }
-
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && logoutOverlay && logoutOverlay.classList.contains('active')) {
             hideLogoutConfirm();

@@ -167,10 +167,10 @@
 #ava-box{
     position: absolute;
     left: 4.5%;
-    top: 4%;
+    top: 5%;
 
     border: 2px solid #393939;
-    background: linear-gradient(45deg, #323232ce, #292929ce);
+    background: linear-gradient(45deg, #323232e4, #292929e4);
     border-radius: 30px;
     padding: 18px 30px;
     z-index: 1000;
@@ -200,10 +200,8 @@
     transition: all 0.2s ease;
 }
 #ava-box img:hover{
-    scale: 1.05;
-}
-#ava-box img:active{
-    scale: 1;
+    scale: 1.08;
+    box-shadow: 0px 0px 17px #7c7c7c;
 }
 
 /* contact us */
@@ -275,4 +273,8 @@
     font-size: 14px;
     user-select: none;
     color: rgba(178, 178, 178, 0.75);
+}
+
+#nickname-input{
+    margin-top: 14px;
 }

@@ -3,6 +3,9 @@ import psycopg2
 import os
 import traceback
 
+from werkzeug.security import generate_password_hash, check_password_hash
+import re
+
 app = Flask(__name__,
             static_folder='static',
             template_folder='templates')
@@ -76,6 +79,121 @@ def get_fragment(page):
         traceback.print_exc()
         return f'Server error: {e}', 500
 
+
+# reg
+
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    password = data.get('password', '')
+    name = data.get('name', '').strip()  # пока опционально, позже добавим
+
+    # Простая валидация
+    if not email or not password:
+        return jsonify({"success": False, "error": "Email и пароль обязательны"}), 400
+
+    if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
+        return jsonify({"success": False, "error": "Некорректный email"}), 400
+
+    if len(password) < 6:
+        return jsonify({"success": False, "error": "Пароль должен быть минимум 6 символов"}), 400
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        # Проверяем, не занят ли email
+        cur.execute("SELECT id FROM users WHERE email = %s", (email,))
+        if cur.fetchone():
+            cur.close()
+            conn.close()
+            return jsonify({"success": False, "error": "Email уже зарегистрирован"}), 409
+
+        # Хешируем пароль
+        hashed = generate_password_hash(password)
+
+        # Вставляем нового пользователя
+        cur.execute(
+            "INSERT INTO users (email, password, name) VALUES (%s, %s, %s) RETURNING id",
+            (email, hashed, name if name else None)
+        )
+        user_id = cur.fetchone()[0]
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify({"success": True, "user_id": user_id, "message": "Регистрация успешна"})
+    except Exception as e:
+        print(f"[ERROR] /api/register: {e}")
+        traceback.print_exc()
+        return jsonify({"success": False, "error": "Ошибка сервера"}), 500
+
+# login
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    password = data.get('password', '')
+
+    if not email or not password:
+        return jsonify({"success": False, "error": "Email и пароль обязательны"}), 400
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT id, email, password, name FROM users WHERE email = %s", (email,))
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if not user or not check_password_hash(user[2], password):
+            return jsonify({"success": False, "error": "Неверный email или пароль"}), 401
+
+        return jsonify({
+            "success": True,
+            "user_id": user[0],
+            "email": user[1],
+            "name": user[3],
+            "message": "Вход выполнен"
+        })
+    except Exception as e:
+        print(f"[ERROR] /api/login: {e}")
+        traceback.print_exc()
+        return jsonify({"success": False, "error": "Ошибка сервера"}), 500
+
+# name
+
+@app.route('/api/update_profile', methods=['POST'])
+def update_profile():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    name = data.get('name', '').strip()
+
+    if not user_id:
+        return jsonify({"success": False, "error": "user_id обязателен"}), 400
+    if not name:
+        return jsonify({"success": False, "error": "Имя не может быть пустым"}), 400
+    if len(name) > 100:
+        return jsonify({"success": False, "error": "Имя слишком длинное"}), 400
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("UPDATE users SET name = %s WHERE id = %s RETURNING id", (name, user_id))
+        updated = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        if not updated:
+            return jsonify({"success": False, "error": "Пользователь не найден"}), 404
+
+        return jsonify({"success": True, "message": "Имя обновлено", "name": name})
+    except Exception as e:
+        print(f"[ERROR] /api/update_profile: {e}")
+        traceback.print_exc()
+        return jsonify({"success": False, "error": "Ошибка сервера"}), 500
 
 # ─── Songs API ────────────────────────────────────────────────────────────────
 

@@ -126,6 +126,7 @@ function clearCharacterFilter() {
 // ==================== ИНИЦИАЛИЗАЦИЯ КРУГОВ ====================
 
 function initCirculindex() {
+    updateProfileAvatar();
     const circuls = document.querySelectorAll('.circulindex');
     if (!circuls.length) return;
 
@@ -181,7 +182,8 @@ function initCirculindex() {
 }
 
 // Alias для spa.js — он вызывает reinitCirculindex и refreshCirculsUI
-function reinitCirculindex() { initCirculindex(); }
+function reinitCirculindex() { updateProfileAvatar();
+                                initCirculindex(); }
 function refreshCirculsUI() { initCirculindex(); }
 
 // ==================== СИНХРОНИЗАЦИЯ ИКОНОК ПРИ СМЕНЕ ТРЕКА ====================
@@ -303,6 +305,27 @@ function initNavStickyToCorner() {
     scrollBox._navStickyHandler = handleScroll;
     scrollBox.addEventListener('scroll', handleScroll);
     handleScroll(); // вызвать один раз для начального состояния
+}
+
+// ==================== АВАТАРКА НА ГЛАВНОЙ ====================
+
+function updateProfileAvatar() {
+    const avatarImg = document.getElementById('avatar');
+    if (!avatarImg) return;
+    
+    const savedAvatar = localStorage.getItem('user_avatar');
+    if (savedAvatar && savedAvatar !== avatarImg.src) {
+        avatarImg.src = savedAvatar;
+    }
+}
+
+
+
+// Также вызываем сразу, если DOM уже загружен
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateProfileAvatar);
+} else {
+    updateProfileAvatar();
 }
 
 // ==================== ЭКСПОРТ ====================
