@@ -333,9 +333,18 @@ function initTracks() {
 
 function initProfile() {
     log('initProfile');
-    if (typeof window.runProfilePage === 'function') {
-        window.runProfilePage();
-    }
+    // Загружаем треки и восстанавливаем плеер (как на главной)
+    (async () => {
+        if (typeof window.loadSongs === 'function') {
+            await window.loadSongs();
+        }
+        if (typeof window.restorePlayerUI === 'function') {
+            window.restorePlayerUI();
+        }
+        if (typeof window.runProfilePage === 'function') {
+            window.runProfilePage();
+        }
+    })();
 }
 
 function initBio() {

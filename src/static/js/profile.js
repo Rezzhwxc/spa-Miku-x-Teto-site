@@ -325,6 +325,7 @@ async function handleDeleteConfirm() {
     async function loadFavorites() {
         const likesBox = document.getElementById('likes-box');
         if (!likesBox) return;
+        likesBox.innerHTML = '<p class="profile-empty">Загрузка избранных...</p>';
         const userId = localStorage.getItem('user_id');
         if (!userId) {
             likesBox.innerHTML = '<p class="profile-empty">Войдите, чтобы видеть избранное</p>';

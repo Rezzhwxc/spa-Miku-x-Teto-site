@@ -18,6 +18,9 @@ window.currentCharacterFilter = null;
 window.isPlayingFromFavorites = false;
 window.currentFavoriteList = [];
 
+window._playerUpdateTimer = null;
+window._playerUpdateAnimationTimer = null;
+
 let audioContext = null;
 let mediaSourceNode = null;
 let gainNode = null;
@@ -227,6 +230,8 @@ function updateNavButtons(song) {
 }
 
 function updatePlayerUI(song, opts = {}) {
+    if (window._playerUpdateTimer) clearTimeout(window._playerUpdateTimer);
+    if (window._playerUpdateAnimationTimer) clearTimeout(window._playerUpdateAnimationTimer);
     if (!song) return;
 
     const silent = opts.silent === true;
@@ -258,10 +263,10 @@ function updatePlayerUI(song, opts = {}) {
     artistEl?.classList.add('fade-out');
     coverEl?.classList.add('slide-out-left');
 
-    setTimeout(() => {
-        if (titleEl) titleEl.textContent = song.name || '—';
-        if (artistEl) artistEl.textContent = song.vocaloid_name || 'Vocaloid';
-        if (coverEl) coverEl.src = song.photo ? `/photo/${song.photo}` : '/static/img/default-cover.png';
+    window._playerUpdateTimer = setTimeout(() => {
+    if (titleEl) titleEl.textContent = song.name || '—';
+    if (artistEl) artistEl.textContent = song.vocaloid_name || 'Vocaloid';
+    if (coverEl) coverEl.src = song.photo ? `/photo/${song.photo}` : '/static/img/default-cover.png';
 
         titleEl?.classList.remove('fade-out');
         artistEl?.classList.remove('fade-out');
@@ -275,7 +280,7 @@ function updatePlayerUI(song, opts = {}) {
         artistEl?.classList.add('fade-in');
         coverEl?.classList.add('slide-in-left');
 
-        setTimeout(() => {
+        window._playerUpdateAnimationTimer = setTimeout(() => {
             titleEl?.classList.remove('fade-in');
             artistEl?.classList.remove('fade-in');
             coverEl?.classList.remove('slide-in-left');
@@ -314,19 +319,29 @@ function restorePlayerUI() {
 }
 
 function playSongById(songId, autoPlay = true, fromFavorites = false) {
+    // Очищаем таймауты анимаций перед новым треком
+    if (window._playerUpdateTimer) clearTimeout(window._playerUpdateTimer);
+    if (window._playerUpdateAnimationTimer) clearTimeout(window._playerUpdateAnimationTimer);
+
     const song = songsList.find(s => s.id == songId);
     if (!song) return;
     
-    // ★ Сброс режима избранного, если трек запущен не из избранного списка ★
+    // Если этот трек уже играет – ничего не делаем (или можно было бы поставить на паузу, но не нужно)
+    if (currentSongId == songId && currentAudio && !currentAudio.paused) {
+        return;
+    }
+    
+    // Сброс режима избранного, если трек не из избранного
     if (!fromFavorites) {
         window.isPlayingFromFavorites = false;
         window.currentFavoriteList = [];
     }
     
     if (!currentAudio) initAudio();
-    updatePlayerUI(song);
-
-    if (currentSongId != songId) {
+    
+    const isNewSong = (currentSongId != songId);
+    
+    if (isNewSong) {
         resetAllCirculIcons();
         currentAudio.src = `/play/${songId}`;
         currentSongId = songId;
@@ -336,30 +351,15 @@ function playSongById(songId, autoPlay = true, fromFavorites = false) {
             playerElements.progressBar.style.setProperty('--progress', '0%');
         }
     }
-
-    const shouldAnimate = currentSongId != songId;
-    updatePlayerUI(song, { silent: !shouldAnimate });
-
+    
+    // Обновляем UI один раз (анимация только для нового трека)
+    updatePlayerUI(song, { silent: !isNewSong });
+    
     if (autoPlay) {
         const attemptPlay = () => {
-            currentAudio.play().catch(async (e) => {
-                console.log('Автовоспроизведение заблокировано, разблокируем AudioContext...');
-                if (audioContext && audioContext.state === 'suspended') {
-                    await audioContext.resume();
-                }
-                try {
-                    await currentAudio.play();
-                    console.log('Воспроизведение успешно после разблокировки');
-                } catch (err) {
-                    console.log('Плеер будет ждать клика пользователя');
-                    if (playerElements.title) {
-                        const originalTitle = playerElements.title.textContent;
-                        playerElements.title.textContent = 'кликните для воспроизведения';
-                        setTimeout(() => {
-                            if (playerElements.title) playerElements.title.textContent = originalTitle;
-                        }, 2000);
-                    }
-                }
+            currentAudio.play().catch((err) => {
+                // Только лог в консоль, без изменения UI
+                console.log('Автовоспроизведение заблокировано:', err);
             });
         };
         if (audioContext && audioContext.state === 'suspended') {
@@ -370,7 +370,7 @@ function playSongById(songId, autoPlay = true, fromFavorites = false) {
         updateCirculIcon(songId, true);
         if (playerElements.playPauseImg) playerElements.playPauseImg.src = '/static/img/pause-button.png';
     }
-
+    
     highlightActiveSong(songId);
     syncGlobals();
 }
