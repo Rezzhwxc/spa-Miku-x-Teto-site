@@ -357,26 +357,26 @@ async function handleDeleteConfirm() {
     }
 
     function buildFavoriteCard(song) {
-    const cover = song.photo ? `/photo/${song.photo}` : '/static/img/default-cover.png';
-    const artist = escapeHtml(song.vocaloid_name || 'Vocaloid');
-    const name = escapeHtml(song.name || '—');
-    const isPlaying = window.currentSongId && String(window.currentSongId) === String(song.id);
-    const playIcon = (isPlaying && window.currentAudio && !window.currentAudio.paused)
-        ? '/static/img/pause-button.png'
-        : '/static/img/Polygon 3 (1).png';
-    return `
-        <div class="search-item" data-id="${song.id}">
-            <div class="search-cover">
-                <img src="${cover}" onerror="this.src='/static/img/default-cover.png'" alt="${name}">
-            </div>
-            <div class="search-info">
-                <div class="search-title">${name}</div>
-                <div class="search-artist">${artist}</div>
-            </div>
-            <div class="search-play">
-                <img src="${playIcon}" alt="play">
-            </div>
-        </div>`;
+        const cover = song.photo ? `/photo/${song.photo}` : '/static/img/default-cover.png';
+        const artist = escapeHtml(song.vocaloid_name || 'Vocaloid');
+        const name = escapeHtml(song.name || '—');
+        const isPlaying = window.currentSongId && String(window.currentSongId) === String(song.id);
+        const playIcon = (isPlaying && window.currentAudio && !window.currentAudio.paused)
+            ? '/static/img/pause-button.png'
+            : '/static/img/Polygon 3 (1).png';
+        return `
+            <div class="search-item" data-id="${song.id}">
+                <div class="search-cover">
+                    <img src="${cover}" onerror="this.src='/static/img/default-cover.png'" alt="${name}">
+                </div>
+                <div class="search-info">
+                    <div class="search-title">${name}</div>
+                    <div class="search-artist">${artist}</div>
+                </div>
+                <div class="search-play">
+                    <img src="${playIcon}" alt="play">
+                </div>
+            </div>`;
 }
 
     function attachFavoriteCardHandlers(container) {
@@ -435,10 +435,10 @@ async function handleDeleteConfirm() {
     });
 }
 
-    // Вызов загрузки избранного после загрузки треков (как и в случае с недавними)
-    // Можно добавить в конец runProfilePage:
+    // Вызов загрузки избранного после загрузки треков
     if (getSongs().length) {
         loadFavorites();
+        loadRecent();
     } else {
         let attempts = 0;
         const poll = setInterval(() => {
@@ -446,9 +446,102 @@ async function handleDeleteConfirm() {
             if (getSongs().length || attempts > 30) {
                 clearInterval(poll);
                 loadFavorites();
+                loadRecent();
             }
         }, 150);
     }
+
+    // ========== 6. ЗАГРУЗКА НЕДАВНИХ ТРЕКОВ ==========
+async function loadRecent() {
+    const recentBox = document.getElementById('recent-box');
+    if (!recentBox) return;
+
+    const recentIds = JSON.parse(localStorage.getItem('recent_songs') || '[]');
+    if (!recentIds.length) {
+        recentBox.innerHTML = '<p class="profile-empty">Вы ещё ничего не слушали (</p>';
+        return;
+    }
+
+    const allSongs = getSongs();
+    const recentSongs = recentIds
+        .map(id => allSongs.find(s => String(s.id) === String(id)))
+        .filter(Boolean)
+        .slice(0, 10);
+
+    if (!recentSongs.length) {
+        recentBox.innerHTML = '<p class="profile-empty">Вы ещё ничего не слушали (</p>';
+        return;
+    }
+
+    recentBox.innerHTML = recentSongs.map(song => buildRecentCard(song)).join('');
+    attachRecentCardHandlers(recentBox);
+}
+
+function buildRecentCard(song) {
+    const cover = song.photo ? `/photo/${song.photo}` : '/static/img/default-cover.png';
+    const artist = escapeHtml(song.vocaloid_name || 'Vocaloid');
+    const name = escapeHtml(song.name || '—');
+    const isPlaying = window.currentSongId && String(window.currentSongId) === String(song.id);
+    const playIcon = (isPlaying && window.currentAudio && !window.currentAudio.paused)
+        ? '/static/img/pause-button.png'
+        : '/static/img/Polygon 3 (1).png';
+    return `
+        <div class="search-item" data-id="${song.id}">
+            <div class="search-cover">
+                <img src="${cover}" onerror="this.src='/static/img/default-cover.png'" alt="${name}">
+            </div>
+            <div class="search-info">
+                <div class="search-title">${name}</div>
+                <div class="search-artist">${artist}</div>
+            </div>
+            <div class="search-play">
+                <img src="${playIcon}" alt="play">
+            </div>
+        </div>`;
+}
+
+function attachRecentCardHandlers(container) {
+    container.querySelectorAll('.search-play').forEach(btn => {
+        const parentItem = btn.closest('.search-item');
+        const songId = parentItem ? parseInt(parentItem.dataset.id) : null;
+        if (!songId) return;
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (typeof window.playSongById === 'function') {
+                window.playSongById(songId, true);
+            }
+            setTimeout(() => refreshProfilePlayIcons(), 200);
+        });
+    });
+    container.querySelectorAll('.search-item').forEach(item => {
+        const songId = parseInt(item.dataset.id);
+        if (!songId) return;
+        item.addEventListener('click', (e) => {
+            if (e.target.closest('.search-play')) return;
+            if (typeof window.playSongById === 'function') {
+                window.playSongById(songId, true);
+            }
+            setTimeout(() => refreshProfilePlayIcons(), 200);
+        });
+        item.style.cursor = 'pointer';
+    });
+}
+
+// --- Функция принудительного обновления блока «Недавние» ---
+    async function refreshRecentBox() {
+        const recentBox = document.getElementById('recent-box');
+        if (recentBox) {
+            await loadRecent(); // повторно загружает и отрисовывает
+        }
+    }
+
+    // --- Удаляем старый обработчик, если он был, чтобы не навесить несколько ---
+    if (window._recentUpdateHandler) {
+        window.removeEventListener('recentSongsUpdated', window._recentUpdateHandler);
+    }
+    window._recentUpdateHandler = () => refreshRecentBox();
+    window.addEventListener('recentSongsUpdated', window._recentUpdateHandler);
+    
     document.addEventListener('playStateChanged', refreshProfilePlayIcons);
 }
 

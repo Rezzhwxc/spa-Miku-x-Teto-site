@@ -360,6 +360,15 @@ async function playFavoritesPlaylist() {
         return;
     }
     
+    // Если уже активен режим избранного – просто переключаем паузу/воспроизведение
+    if (window.isPlayingFromFavorites === true) {
+        if (typeof window.togglePlayPause === 'function') {
+            window.togglePlayPause();
+        }
+        updateFavoritesIcon();
+        return;
+    }
+    
     // Ждём, пока загрузятся треки (если ещё не загружены)
     if (!window.songsList || !window.songsList.length) {
         if (typeof window.loadSongs === 'function') {
@@ -375,7 +384,7 @@ async function playFavoritesPlaylist() {
         const data = await response.json();
         if (!data.success) throw new Error(data.error);
         
-        const favoriteIds = data.favorites; // массив id лайкнутых треков
+        const favoriteIds = data.favorites;
         if (!favoriteIds.length) {
             if (typeof window.showToast === 'function') {
                 window.showToast('У вас пока нет избранных треков', 'error');
@@ -404,9 +413,13 @@ async function playFavoritesPlaylist() {
             window.playSongById(favoriteSongs[0].id, true, true);
         }
         
+        // Показываем тост только при первом запуске (не при переключении паузы)
         if (typeof window.showToast === 'function') {
             window.showToast(`Сейчас играет: избранные, всего ${favoriteSongs.length} треков`, 'success');
         }
+        
+        // Обновляем иконку
+        updateFavoritesIcon();
     } catch (err) {
         console.error('Ошибка загрузки избранного плейлиста:', err);
         if (typeof window.showToast === 'function') {
@@ -414,6 +427,24 @@ async function playFavoritesPlaylist() {
         }
     }
 }
+
+// ==================== ОБНОВЛЕНИЕ ИКОНКИ ИЗБРАННОГО ====================
+function updateFavoritesIcon() {
+    const isActive = window.isPlayingFromFavorites === true;
+    const isPlaying = window.currentAudio && !window.currentAudio.paused;
+    const icon = document.querySelector('#likes img');
+    if (!icon) return;
+    if (isActive && isPlaying) {
+        icon.src = '/static/img/pauseindex.png';
+    } else if (isActive && !isPlaying) {
+        icon.src = '/static/img/PolygonIndex.png';
+    } else {
+        icon.src = '/static/img/PolygonIndex.png';
+    }
+}
+
+// Подписываемся на изменения состояния плеера
+document.addEventListener('playStateChanged', updateFavoritesIcon);
 
 
 // Также вызываем сразу, если DOM уже загружен

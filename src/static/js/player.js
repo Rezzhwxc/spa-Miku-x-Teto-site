@@ -345,6 +345,7 @@ function playSongById(songId, autoPlay = true, fromFavorites = false) {
         resetAllCirculIcons();
         currentAudio.src = `/play/${songId}`;
         currentSongId = songId;
+        addToRecentSongs(songId);
         currentAudio.load();
         if (playerElements.progressBar) {
             playerElements.progressBar.value = 0;
@@ -995,6 +996,24 @@ function attachVocaloidLinkHandlers() {
         el.onmouseenter = () => el.style.color = 'rgba(189, 189, 189, 0.79)';
         el.onmouseleave = () => el.style.color = '';
     });
+}
+
+// ─── НЕДАВНО ПРОСЛУШАННЫЕ ────────────────────────────────────────────────────
+function addToRecentSongs(songId) {
+    try {
+        let recent = JSON.parse(localStorage.getItem('recent_songs') || '[]');
+        const idStr = String(songId);
+        // Убираем если уже есть, кладём в начало
+        recent = recent.filter(id => String(id) !== idStr);
+        recent.unshift(idStr);
+        // Храним только 10
+        recent = recent.slice(0, 10);
+        localStorage.setItem('recent_songs', JSON.stringify(recent));
+        
+        window.dispatchEvent(new CustomEvent('recentSongsUpdated', { detail: { songId } }));
+    } catch (e) {
+        console.warn('addToRecentSongs error:', e);
+    }
 }
 
 window.loadSongs = loadSongs;
