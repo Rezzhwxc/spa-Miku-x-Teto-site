@@ -65,11 +65,15 @@
     z-index: 10;
 }
 #likes img{
+    margin: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 #likes img:hover{
-    scale: 0.9;
+    scale: 1.08;
+}
+#likes img:active{
+    scale: 0.95;
     opacity: 0.85;
 }
 

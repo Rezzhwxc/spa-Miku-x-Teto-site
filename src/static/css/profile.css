@@ -302,6 +302,7 @@
 .search-play {
     width: 55px;
     height: 55px;
+    margin-right: 5px;
 }
 
 .search-play img {

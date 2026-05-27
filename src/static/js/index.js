@@ -127,6 +127,7 @@ function clearCharacterFilter() {
 
 function initCirculindex() {
     updateProfileAvatar();
+    initLikesIcon();
     const circuls = document.querySelectorAll('.circulindex');
     if (!circuls.length) return;
 
@@ -182,8 +183,9 @@ function initCirculindex() {
 }
 
 // Alias для spa.js — он вызывает reinitCirculindex и refreshCirculsUI
-function reinitCirculindex() { updateProfileAvatar();
-                                initCirculindex(); }
+function reinitCirculindex() {updateProfileAvatar();
+                                initLikesIcon();
+                                    initCirculindex(); }
 function refreshCirculsUI() { initCirculindex(); }
 
 // ==================== СИНХРОНИЗАЦИЯ ИКОНОК ПРИ СМЕНЕ ТРЕКА ====================
@@ -328,6 +330,90 @@ function updateProfileAvatar() {
     }
 }
 
+// ==================== ИНИЦИАЛИЗАЦИЯ ИКОНКИ ИЗБРАННОГО ====================
+function initLikesIcon() {
+    const likesIcon = document.querySelector('#likes img');
+    if (!likesIcon) return;
+    // Удаляем старый обработчик, чтобы не дублировать
+    if (likesIcon._favClickHandler) {
+        likesIcon.removeEventListener('click', likesIcon._favClickHandler);
+    }
+    const handler = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        playFavoritesPlaylist();
+    };
+    likesIcon._favClickHandler = handler;
+    likesIcon.addEventListener('click', handler);
+}
+
+// ==================== ВОСПРОИЗВЕДЕНИЕ ИЗБРАННОГО ПЛЕЙЛИСТА ====================
+
+async function playFavoritesPlaylist() {
+    const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
+    const userId = localStorage.getItem('user_id');
+    
+    if (!isLoggedIn || !userId) {
+        if (typeof window.showToast === 'function') {
+            window.showToast('Сначала войдите в аккаунт', 'error');
+        }
+        return;
+    }
+    
+    // Ждём, пока загрузятся треки (если ещё не загружены)
+    if (!window.songsList || !window.songsList.length) {
+        if (typeof window.loadSongs === 'function') {
+            await window.loadSongs();
+        } else {
+            console.warn('loadSongs не определена');
+            return;
+        }
+    }
+    
+    try {
+        const response = await fetch(`/api/favorites?user_id=${userId}`);
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error);
+        
+        const favoriteIds = data.favorites; // массив id лайкнутых треков
+        if (!favoriteIds.length) {
+            if (typeof window.showToast === 'function') {
+                window.showToast('У вас пока нет избранных треков', 'error');
+            }
+            return;
+        }
+        
+        const allSongs = window.songsList;
+        const favoriteSongs = favoriteIds
+            .map(id => allSongs.find(s => String(s.id) === String(id)))
+            .filter(Boolean);
+        
+        if (!favoriteSongs.length) {
+            if (typeof window.showToast === 'function') {
+                window.showToast('Не удалось загрузить избранные треки', 'error');
+            }
+            return;
+        }
+        
+        // Устанавливаем режим избранного в плеере
+        window.isPlayingFromFavorites = true;
+        window.currentFavoriteList = favoriteSongs;
+        
+        // Запускаем первый трек из избранного
+        if (typeof window.playSongById === 'function') {
+            window.playSongById(favoriteSongs[0].id, true, true);
+        }
+        
+        if (typeof window.showToast === 'function') {
+            window.showToast(`Сейчас играет: избранные, всего ${favoriteSongs.length} треков`, 'success');
+        }
+    } catch (err) {
+        console.error('Ошибка загрузки избранного плейлиста:', err);
+        if (typeof window.showToast === 'function') {
+            window.showToast('Ошибка при загрузке избранного', 'error');
+        }
+    }
+}
 
 
 // Также вызываем сразу, если DOM уже загружен
