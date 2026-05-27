@@ -150,7 +150,6 @@ async function save() {
                 if (e.key === 'Enter') { e.preventDefault(); save(); }
                 if (e.key === 'Escape') { restoreNickname(current); }
             });
-            input.addEventListener('blur', () => setTimeout(save, 120));
         };
 
         editBtn._nickEditHandler = editHandler;
@@ -211,19 +210,33 @@ async function save() {
     }
 
     avatarOptions.forEach(option => {
-        option.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const newSrc = this.src;
-            avatarImg.src = newSrc;
-            localStorage.setItem('user_avatar', newSrc);
-            closeAvaBox();
-            if (typeof showToast === 'function') {
-                showToast('Аватар изменён!', 'success');
+    option.addEventListener('click', async function(e) {
+        e.stopPropagation();
+        const newSrc = this.src;
+        avatarImg.src = newSrc;
+        localStorage.setItem('user_avatar', newSrc);
+        closeAvaBox();
+
+        // Отправляем на сервер
+        try {
+            const response = await fetch('/api/update_avatar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: currentUserId, avatar_url: newSrc })
+            });
+            const data = await response.json();
+            if (data.success) {
+                if (typeof window.showToast === 'function') {
+                    window.showToast('Аватар сохранён!', 'success');
+                }
             } else {
-                console.log('Аватар изменён на', newSrc);
+                console.warn('Не удалось сохранить аватар на сервере');
             }
-        });
+        } catch (err) {
+            console.error('Ошибка отправки аватарки', err);
+        }
     });
+});
 }
 
 window.runProfilePage = runProfilePage;

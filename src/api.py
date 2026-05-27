@@ -114,8 +114,8 @@ def register():
 
         # Вставляем нового пользователя
         cur.execute(
-            "INSERT INTO users (email, password, name) VALUES (%s, %s, %s) RETURNING id",
-            (email, hashed, name if name else None)
+            "INSERT INTO users (email, password, name, avatar) VALUES (%s, %s, %s, %s) RETURNING id",
+            (email, hashed, name if name else None, '/static/img/default.png')
         )
         user_id = cur.fetchone()[0]
         conn.commit()
@@ -142,7 +142,7 @@ def login():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT id, email, password, name FROM users WHERE email = %s", (email,))
+        cur.execute("SELECT id, email, password, name, avatar FROM users WHERE email = %s", (email,))
         user = cur.fetchone()
         cur.close()
         conn.close()
@@ -155,6 +155,7 @@ def login():
             "user_id": user[0],
             "email": user[1],
             "name": user[3],
+            "avatar": user[4] if user[4] else '/static/img/default.png',
             "message": "Вход выполнен"
         })
     except Exception as e:
@@ -196,6 +197,37 @@ def update_profile():
         return jsonify({"success": True, "message": "Имя обновлено", "name": name})
     except Exception as e:
         print(f"[ERROR] /api/update_profile: {e}")
+        traceback.print_exc()
+        return jsonify({"success": False, "error": "Ошибка сервера"}), 500
+
+#avatar
+
+@app.route('/api/update_avatar', methods=['POST'])
+def update_avatar():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    avatar_url = data.get('avatar_url', '').strip()
+
+    if not user_id:
+        return jsonify({"success": False, "error": "user_id обязателен"}), 400
+    if not avatar_url:
+        return jsonify({"success": False, "error": "URL аватарки не может быть пустым"}), 400
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("UPDATE users SET avatar = %s WHERE id = %s RETURNING id", (avatar_url, user_id))
+        updated = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        if not updated:
+            return jsonify({"success": False, "error": "Пользователь не найден"}), 404
+
+        return jsonify({"success": True, "message": "Аватар обновлён", "avatar_url": avatar_url})
+    except Exception as e:
+        print(f"[ERROR] /api/update_avatar: {e}")
         traceback.print_exc()
         return jsonify({"success": False, "error": "Ошибка сервера"}), 500
 

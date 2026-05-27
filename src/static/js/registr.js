@@ -150,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('user_id', data.user_id);
                     localStorage.setItem('user_name', data.name || '');
                     localStorage.setItem('is_logged_in', 'true');
+                    localStorage.setItem('user_avatar', data.avatar || '/static/img/default.png');
                     showToast('Добро пожаловать, ' + (data.name || email.split('@')[0]), 'success');
                     hideAllModals();
                     const regBtn = document.getElementById('regjs');
@@ -206,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('user_id', data.user_id);
                     localStorage.setItem('user_name', tempName);
                     localStorage.setItem('is_logged_in', 'true');
+                    localStorage.setItem('user_avatar', data.avatar || '/static/img/default.png');
                     showToast('Успешно! Добро пожаловать, ' + tempName + '^^', 'success');
                     hideAllModals();
                     const regBtn = document.getElementById('regjs');
@@ -228,6 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('user_id');
         localStorage.removeItem('user_name');
         localStorage.removeItem('is_logged_in');
+        localStorage.removeItem('user_avatar');
         
         const regBtn = document.getElementById('regjs');
         if (regBtn) {

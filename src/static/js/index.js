@@ -313,6 +313,15 @@ function updateProfileAvatar() {
     const avatarImg = document.getElementById('avatar');
     if (!avatarImg) return;
     
+    const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
+    if (!isLoggedIn) {
+        // Незалогиненный — всегда default.png
+        if (avatarImg.src !== '/static/img/default.png') {
+            avatarImg.src = '/static/img/default.png';
+        }
+        return;
+    }
+    
     const savedAvatar = localStorage.getItem('user_avatar');
     if (savedAvatar && savedAvatar !== avatarImg.src) {
         avatarImg.src = savedAvatar;
