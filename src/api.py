@@ -231,6 +231,34 @@ def update_avatar():
         traceback.print_exc()
         return jsonify({"success": False, "error": "Ошибка сервера"}), 500
 
+# delete acc
+
+@app.route('/api/delete_account', methods=['POST'])
+def delete_account():
+    data = request.get_json()
+    user_id = data.get('user_id')
+
+    if not user_id:
+        return jsonify({"success": False, "error": "user_id обязателен"}), 400
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM users WHERE id = %s RETURNING id", (user_id,))
+        deleted = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        if not deleted:
+            return jsonify({"success": False, "error": "Пользователь не найден"}), 404
+
+        return jsonify({"success": True, "message": "Аккаунт удалён"})
+    except Exception as e:
+        print(f"[ERROR] /api/delete_account: {e}")
+        traceback.print_exc()
+        return jsonify({"success": False, "error": "Ошибка сервера"}), 500
+
 # ─── Songs API ────────────────────────────────────────────────────────────────
 
 @app.route('/api/songs')

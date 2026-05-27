@@ -11,16 +11,6 @@ if (!isLoggedIn || !userId) {
     if (typeof window.showToast === 'function') {
         window.showToast('Сначала войдите в аккаунт', 'error');
     }
-    // Очищаем содержимое страницы профиля
-    const scrollBox = document.querySelector('.scroll-box');
-    if (scrollBox) {
-        scrollBox.innerHTML = `
-            <div style="text-align:center;padding:50px;color:#e6e3e3;font-family:unbound">
-                ⚠️ Доступ запрещён.<br>
-                <a href="/index" style="color:#10dfd8; text-decoration:none;">Вернуться на главную</a>
-            </div>
-        `;
-    }
     // Перенаправляем через 1 секунду (чтобы пользователь увидел сообщение)
     setTimeout(() => {
         if (typeof window.navigateTo === 'function') {
@@ -237,6 +227,95 @@ async function save() {
         }
     });
 });
+
+// ========== 4. УДАЛЕНИЕ АККАУНТА ==========
+const deleteBtn = document.getElementById('leave');
+const deleteOverlay = document.getElementById('deleteConfirmOverlay');
+const deleteMessage = document.getElementById('deleteConfirmMessage');
+const deleteConfirmYes = document.getElementById('deleteConfirmYes');
+const deleteConfirmCancel = document.getElementById('deleteConfirmCancel');
+
+let deleteStep = 1; // 1 = первый вопрос, 2 = второй вопрос
+
+function showDeleteConfirm(step = 1) {
+    if (!deleteOverlay) return;
+    deleteStep = step;
+    if (step === 1) {
+        deleteMessage.textContent = 'Вы уверены, что хотите удалить аккаунт?';
+        deleteConfirmYes.textContent = 'Да, удалить';
+    } else {
+        deleteMessage.textContent = 'После удаления все ваши избранные и сохранения безвозвратно удалятся!!';
+        deleteConfirmYes.textContent = 'Продолжить';
+    }
+    deleteOverlay.style.display = 'flex';
+    setTimeout(() => deleteOverlay.classList.add('active'), 10);
+}
+
+function hideDeleteConfirm() {
+    if (!deleteOverlay) return;
+    deleteOverlay.classList.remove('active');
+    setTimeout(() => deleteOverlay.style.display = 'none', 300);
+}
+
+if (deleteBtn) {
+    deleteBtn.addEventListener('click', () => {
+        showDeleteConfirm(1);
+    });
+}
+
+async function handleDeleteConfirm() {
+    if (deleteStep === 1) {
+        // переходим ко второму шагу
+        showDeleteConfirm(2);
+    } else {
+        // выполняем удаление
+        try {
+            const response = await fetch('/api/delete_account', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: currentUserId })
+            });
+            const data = await response.json();
+            if (data.success) {
+                window.showToast('Аккаунт удалён. До встречи^^', 'success');
+                // очищаем localStorage
+                localStorage.removeItem('user_email');
+                localStorage.removeItem('user_id');
+                localStorage.removeItem('user_name');
+                localStorage.removeItem('is_logged_in');
+                localStorage.removeItem('user_avatar');
+                // перенаправляем на главную
+                setTimeout(() => {
+                    window.location.href = '/index';
+                }, 1500);
+            } else {
+                window.showToast(data.error || 'Ошибка при удалении', 'error');
+                hideDeleteConfirm();
+            }
+        } catch (err) {
+            console.error(err);
+            window.showToast('Ошибка соединения с сервером', 'error');
+            hideDeleteConfirm();
+        }
+    }
+}
+
+        if (deleteConfirmYes) {
+            deleteConfirmYes.addEventListener('click', handleDeleteConfirm);
+        }
+        if (deleteConfirmCancel) {
+            deleteConfirmCancel.addEventListener('click', () => hideDeleteConfirm());
+        }
+        if (deleteOverlay) {
+            deleteOverlay.addEventListener('click', (e) => {
+                if (e.target === deleteOverlay) hideDeleteConfirm();
+            });
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && deleteOverlay && deleteOverlay.classList.contains('active')) {
+                hideDeleteConfirm();
+            }
+        });
 }
 
 window.runProfilePage = runProfilePage;
