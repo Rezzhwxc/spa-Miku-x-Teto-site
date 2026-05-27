@@ -2,6 +2,7 @@
 
 function runProfilePage() {
     console.log('[PROFILE] инициализация');
+    const songsList = getSongs();
     // ★ ПРОВЕРКА АВТОРИЗАЦИИ ★
 const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
 const userId = localStorage.getItem('user_id');
@@ -316,6 +317,140 @@ async function handleDeleteConfirm() {
                 hideDeleteConfirm();
             }
         });
+
+    // ★ ОБЪЯВЛЯЕМ ПЕРЕМЕННУЮ ДЛЯ ХРАНЕНИЯ СПИСКА ИЗБРАННЫХ ТРЕКОВ ★
+    let favoriteSongsList = [];
+
+    // ========== 5. ЗАГРУЗКА ИЗБРАННЫХ ТРЕКОВ ==========
+    async function loadFavorites() {
+        const likesBox = document.getElementById('likes-box');
+        if (!likesBox) return;
+        const userId = localStorage.getItem('user_id');
+        if (!userId) {
+            likesBox.innerHTML = '<p class="profile-empty">Войдите, чтобы видеть избранное</p>';
+            return;
+        }
+        try {
+            const response = await fetch(`/api/favorites?user_id=${userId}`);
+            const data = await response.json();
+            if (data.success && data.favorites.length) {
+                const songs = getSongs();
+                const favoriteSongs = data.favorites
+                    .map(id => songs.find(s => String(s.id) === String(id)))
+                    .filter(Boolean);
+                if (favoriteSongs.length) {
+                    // ★ СОХРАНЯЕМ СПИСОК В ПЕРЕМЕННУЮ ★
+                    favoriteSongsList = favoriteSongs;
+                    likesBox.innerHTML = favoriteSongs.map(song => buildFavoriteCard(song)).join('');
+                    attachFavoriteCardHandlers(likesBox);
+                } else {
+                    likesBox.innerHTML = '<p class="profile-empty">Нет избранных треков</p>';
+                }
+            } else {
+                likesBox.innerHTML = '<p class="profile-empty">Нет избранных треков</p>';
+            }
+        } catch (err) {
+            console.error('Ошибка загрузки избранных:', err);
+            likesBox.innerHTML = '<p class="profile-empty">Ошибка загрузки</p>';
+        }
+    }
+
+    function buildFavoriteCard(song) {
+    const cover = song.photo ? `/photo/${song.photo}` : '/static/img/default-cover.png';
+    const artist = escapeHtml(song.vocaloid_name || 'Vocaloid');
+    const name = escapeHtml(song.name || '—');
+    const isPlaying = window.currentSongId && String(window.currentSongId) === String(song.id);
+    const playIcon = (isPlaying && window.currentAudio && !window.currentAudio.paused)
+        ? '/static/img/pause-button.png'
+        : '/static/img/Polygon 3 (1).png';
+    return `
+        <div class="search-item" data-id="${song.id}">
+            <div class="search-cover">
+                <img src="${cover}" onerror="this.src='/static/img/default-cover.png'" alt="${name}">
+            </div>
+            <div class="search-info">
+                <div class="search-title">${name}</div>
+                <div class="search-artist">${artist}</div>
+            </div>
+            <div class="search-play">
+                <img src="${playIcon}" alt="play">
+            </div>
+        </div>`;
+}
+
+    function attachFavoriteCardHandlers(container) {
+    // Кнопка Play внутри .search-play
+    container.querySelectorAll('.search-play').forEach(btn => {
+        const parentItem = btn.closest('.search-item');
+        const songId = parentItem ? parseInt(parentItem.dataset.id) : null;
+        const currentSong = getSongs().find(s => s.id == window.currentSongId);
+
+        if (!songId) return;
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Проверяем, играет ли уже этот трек
+            const currentSong = songsList.find(s => s.id == window.currentSongId);
+            if (currentSong && currentSong.id == songId && window.currentAudio && !window.currentAudio.paused) {
+                window.togglePlayPause();
+            } else {
+                // Включаем режим избранного
+                window.isPlayingFromFavorites = true;
+                window.currentFavoriteList = [...favoriteSongsList];
+                window.playSongById(songId, true);
+            }
+            setTimeout(() => refreshProfilePlayIcons(), 200);
+        });
+    });
+    // Клик по всей строке .search-item
+    container.querySelectorAll('.search-item').forEach(item => {
+        const songId = parseInt(item.dataset.id);
+        if (!songId) return;
+        item.addEventListener('click', (e) => {
+            if (e.target.closest('.search-play')) return;
+            const currentSong = songsList.find(s => s.id == window.currentSongId);
+            if (currentSong && currentSong.id == songId && window.currentAudio && !window.currentAudio.paused) {
+                window.togglePlayPause();
+            } else {
+                window.isPlayingFromFavorites = true;
+                window.currentFavoriteList = [...favoriteSongsList];
+                window.playSongById(songId, true);
+            }
+            setTimeout(() => refreshProfilePlayIcons(), 200);
+        });
+        item.style.cursor = 'pointer';
+    });
+}
+
+    function refreshProfilePlayIcons() {
+    const isPlaying = window.currentAudio && !window.currentAudio.paused;
+    document.querySelectorAll('.search-play').forEach(btn => {
+        const parentItem = btn.closest('.search-item');
+        if (!parentItem) return;
+        const songId = parseInt(parentItem.dataset.id);
+        const img = btn.querySelector('img');
+        if (img) {
+            img.src = (String(window.currentSongId) === String(songId) && isPlaying)
+                ? '/static/img/pause-button.png'
+                : '/static/img/Polygon 3 (1).png';
+        }
+    });
+}
+
+    // Вызов загрузки избранного после загрузки треков (как и в случае с недавними)
+    // Можно добавить в конец runProfilePage:
+    if (getSongs().length) {
+        loadFavorites();
+    } else {
+        let attempts = 0;
+        const poll = setInterval(() => {
+            attempts++;
+            if (getSongs().length || attempts > 30) {
+                clearInterval(poll);
+                loadFavorites();
+            }
+        }, 150);
+    }
+    document.addEventListener('playStateChanged', refreshProfilePlayIcons);
 }
 
 window.runProfilePage = runProfilePage;

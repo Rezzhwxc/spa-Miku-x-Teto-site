@@ -152,10 +152,12 @@
 }
 #likes-box, #recent-box{
     width: 470px;
-    height: 380px;
+    height: 390px;
     border: 2px solid #5c5c5c;
     border-radius: 25px;
     background-color: #4141416e;
+    overflow-y: auto;
+    scrollbar-width: none;
 }
 
 #box-avatar{
@@ -294,4 +296,11 @@
     font-size: 14px;
     user-select: none;
     color: rgba(178, 178, 178, 0.75);
+}
+
+/* вывываа */
+.search-play img {
+    width: 20px;
+    height: 20px;
+    margin-right: 3px;
 }

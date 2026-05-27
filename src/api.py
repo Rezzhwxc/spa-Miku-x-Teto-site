@@ -329,6 +329,58 @@ def play_song(song_id):
         return f"Server error: {e}", 500
 
 
+# ─── FAVORITES (ЛАЙКИ) ────────────────────────────────────────────────────────
+
+@app.route('/api/favorites', methods=['GET'])
+def get_favorites():
+    user_id = request.args.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "error": "user_id обязателен"}), 400
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT song_id FROM user_favorites WHERE user_id = %s", (user_id,))
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        favorites = [row[0] for row in rows]
+        return jsonify({"success": True, "favorites": favorites})
+    except Exception as e:
+        print(f"[ERROR] /api/favorites: {e}")
+        traceback.print_exc()
+        return jsonify({"success": False, "error": "Ошибка сервера"}), 500
+
+@app.route('/api/favorites/toggle', methods=['POST'])
+def toggle_favorite():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    song_id = data.get('song_id')
+    if not user_id or not song_id:
+        return jsonify({"success": False, "error": "user_id и song_id обязательны"}), 400
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        # Проверяем, есть ли уже лайк
+        cur.execute("SELECT 1 FROM user_favorites WHERE user_id = %s AND song_id = %s", (user_id, song_id))
+        exists = cur.fetchone()
+        if exists:
+            # Удаляем
+            cur.execute("DELETE FROM user_favorites WHERE user_id = %s AND song_id = %s", (user_id, song_id))
+            liked = False
+        else:
+            # Добавляем
+            cur.execute("INSERT INTO user_favorites (user_id, song_id) VALUES (%s, %s)", (user_id, song_id))
+            liked = True
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({"success": True, "liked": liked})
+    except Exception as e:
+        print(f"[ERROR] /api/favorites/toggle: {e}")
+        traceback.print_exc()
+        return jsonify({"success": False, "error": "Ошибка сервера"}), 500
+        
+
 if __name__ == '__main__':
     # Print which template files actually exist
     for name, fname in FRAGMENT_FILES.items():

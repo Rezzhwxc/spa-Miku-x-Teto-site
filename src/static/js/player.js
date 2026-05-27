@@ -15,6 +15,9 @@ window.lastAnimatedSongId = null;
 
 window.currentCharacterFilter = null;
 
+window.isPlayingFromFavorites = false;
+window.currentFavoriteList = [];
+
 let audioContext = null;
 let mediaSourceNode = null;
 let gainNode = null;
@@ -387,11 +390,42 @@ function togglePlayPause() {
 function playPrevSong() {
     if (songNavLock) return;
     songNavLock = true;
+    setTimeout(() => { songNavLock = false; }, 300);
 
-    setTimeout(() => {
-        songNavLock = false;
-    }, 300);
+        // Режим избранного
+    if (window.isPlayingFromFavorites && window.currentFavoriteList.length) {
+        const favorites = window.currentFavoriteList;
+        if (playMode === 1) {
+            // Повтор одного трека – просто перезапускаем текущий
+            if (currentSongId && currentAudio) {
+                currentAudio.currentTime = 0;
+                currentAudio.play();
+            }
+            syncGlobals();
+            return;
+        }
 
+        let prevSong = null;
+        if (playMode === 2) {
+            // Случайный режим: выбираем случайный трек, отличный от текущего
+            const otherSongs = favorites.filter(s => s.id !== currentSongId);
+            if (otherSongs.length) {
+                const randomIdx = Math.floor(Math.random() * otherSongs.length);
+                prevSong = otherSongs[randomIdx];
+            }
+        } else {
+            // Последовательный режим (playMode === 0)
+            const currentIndex = favorites.findIndex(s => s.id == currentSongId);
+            let prevIndex = currentIndex - 1;
+            if (prevIndex < 0) prevIndex = favorites.length - 1;
+            prevSong = favorites[prevIndex];
+        }
+        if (prevSong) playSongById(prevSong.id, true);
+        syncGlobals();
+        return;
+    }
+
+    // Обычный режим с фильтром по персонажу
     if (playMode === 2) {
         if (!originalSongsList.length) return;
 
@@ -423,7 +457,6 @@ function playPrevSong() {
 
     const currentIndex = availableSongs.findIndex(s => s.id == currentSongId);
     let prevIndex;
-
     if (currentIndex === -1) {
         prevIndex = availableSongs.length - 1;
     } else if (currentIndex > 0) {
@@ -434,7 +467,6 @@ function playPrevSong() {
 
     const prevSong = availableSongs[prevIndex];
     if (prevSong) playSongById(prevSong.id, true);
-
     syncGlobals();
 }
 
@@ -446,6 +478,40 @@ function playNextSong() {
         songNavLock = false;
     }, 333);
 
+        // Режим избранного
+    if (window.isPlayingFromFavorites && window.currentFavoriteList.length) {
+        const favorites = window.currentFavoriteList;
+        if (playMode === 1) {
+            // Повтор одного трека
+            if (currentSongId && currentAudio) {
+                currentAudio.currentTime = 0;
+                currentAudio.play();
+            }
+            syncGlobals();
+            return;
+        }
+
+        let nextSong = null;
+        if (playMode === 2) {
+            // Случайный режим
+            const otherSongs = favorites.filter(s => s.id !== currentSongId);
+            if (otherSongs.length) {
+                const randomIdx = Math.floor(Math.random() * otherSongs.length);
+                nextSong = otherSongs[randomIdx];
+            }
+        } else {
+            // Последовательный режим
+            const currentIndex = favorites.findIndex(s => s.id == currentSongId);
+            let nextIndex = currentIndex + 1;
+            if (nextIndex >= favorites.length) nextIndex = 0;
+            nextSong = favorites[nextIndex];
+        }
+        if (nextSong) playSongById(nextSong.id, true);
+        syncGlobals();
+        return;
+    }
+
+    // Обычный режим
     if (playMode === 1) {
         if (currentSongId && currentAudio) {
             currentAudio.currentTime = 0;
@@ -490,7 +556,6 @@ function playNextSong() {
 
     const currentIndex = availableSongs.findIndex(s => s.id == currentSongId);
     let nextIndex;
-
     if (currentIndex === -1) {
         nextIndex = 0;
     } else if (currentIndex < availableSongs.length - 1) {
@@ -501,7 +566,6 @@ function playNextSong() {
 
     const nextSong = availableSongs[nextIndex];
     if (nextSong) playSongById(nextSong.id, true);
-
     syncGlobals();
 }
 
@@ -834,18 +898,95 @@ function attachSongBoxHandlers() {
     });
 }
 
+// ─── ИЗБРАННОЕ (ЛАЙКИ) ──────────────────────────────────────────────────────
+
+function getUserFavorites(userId, callback) {
+    fetch(`/api/favorites?user_id=${userId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                callback(data.favorites);
+            } else {
+                console.error('Ошибка загрузки избранного:', data.error);
+                callback([]);
+            }
+        })
+        .catch(err => {
+            console.error('Ошибка сети:', err);
+            callback([]);
+        });
+}
+
+function toggleFavorite(userId, songId, callback) {
+    fetch('/api/favorites/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, song_id: songId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            callback(data.liked);
+        } else {
+            console.error('Ошибка переключения лайка:', data.error);
+            callback(null);
+        }
+    })
+    .catch(err => {
+        console.error('Ошибка сети:', err);
+        callback(null);
+    });
+}
+
 function attachLikeHandlers() {
-    document.querySelectorAll('.like-song-btn').forEach(btn => {
-        btn.onclick = (e) => {
-            e.stopPropagation();
-            addAnimation(btn, 'like-click-animation');
-            const id = parseInt(btn.dataset.id);
-            const isLiked = btn.dataset.liked === 'true';
+    const userId = localStorage.getItem('user_id');
+    if (!userId) {
+        // Если не залогинен, можно скрыть кнопки лайков или показывать тост
+        document.querySelectorAll('.like-song-btn').forEach(btn => {
+            btn.style.opacity = '0.5';
+            btn.disabled = true;
+        });
+        return;
+    }
+
+    // Загружаем текущий список избранных
+    getUserFavorites(userId, (favorites) => {
+        const favSet = new Set(favorites.map(id => String(id)));
+        document.querySelectorAll('.like-song-btn').forEach(btn => {
+            const songId = btn.dataset.id;
+            const isLiked = favSet.has(String(songId));
+            btn.dataset.liked = String(isLiked);
             const img = btn.querySelector('.like-icon');
-            btn.dataset.liked = String(!isLiked);
-            img.src = isLiked ? '/static/img/heart.png' : '/static/img/heart (1).png';
-            console.log(`${isLiked ? 'Лайк убран' : 'Лайк поставлен'} с трека ID: ${id}`);
+            if (img) img.src = isLiked ? '/static/img/heart (1).png' : '/static/img/heart.png';
+        });
+    });
+
+    // Вешаем обработчики
+    document.querySelectorAll('.like-song-btn').forEach(btn => {
+        if (btn._likeHandler) {
+            btn.removeEventListener('click', btn._likeHandler);
+        }
+        const handler = (e) => {
+            e.stopPropagation();
+            if (!userId) {
+                window.showToast('Войдите в аккаунт, чтобы добавлять в избранное', 'error');
+                return;
+            }
+            const songId = btn.dataset.id;
+            const isLiked = btn.dataset.liked === 'true';
+            addAnimation(btn, 'like-click-animation');
+
+            toggleFavorite(userId, songId, (newLiked) => {
+                if (newLiked !== null) {
+                    btn.dataset.liked = String(newLiked);
+                    const img = btn.querySelector('.like-icon');
+                    if (img) img.src = newLiked ? '/static/img/heart (1).png' : '/static/img/heart.png';
+                    window.showToast(newLiked ? 'Добавлено в избранное' : 'Удалено из избранного', 'success');
+                }
+            });
         };
+        btn._likeHandler = handler;
+        btn.addEventListener('click', handler);
     });
 }
 
