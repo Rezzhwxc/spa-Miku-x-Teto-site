@@ -283,6 +283,7 @@ overflow-y: hidden;}
     gap: 8px;
     
     min-width: 235px;
+    max-width: 235px;
 }
             
 .but-prof:hover{color: #fffdfd; background-color: rgba(0, 0, 0, 0.096);

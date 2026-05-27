@@ -70,6 +70,26 @@
     scale: 0.95;
 }
 
+#nickname-input{
+    position: absolute;
+    left: 50%; transform: translateX(-50%);
+    top: 30px;
+    background: linear-gradient(45deg, #2c2c2c, #292929);
+    border: 1px solid #a0a0a097;
+    box-shadow: inset 0px 0px 4px #a0a0a0aa;
+    border-radius: 12px;
+    color: #eaeaeaee;
+    font-family: 'Unbounded', monospace;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: '1px';
+    padding: 8px 18px;
+    outline: none;
+    max-width: 340px;
+    text-align: center;
+    z-index: 1000;
+}
+
 /* back */
 
 .back {
@@ -142,7 +162,8 @@
     margin: 40px 20px 10px 20px;
     width: 350px;
     border-radius: 50%;
-    border: 3px solid #6f6f6fb1;
+    border: 3px solid #6f6f6f8e;
+    box-shadow: 0px 0px 25px #7c7c7cb2;
     cursor: pointer;
     transition: all 0.25s ease;
 }
@@ -194,7 +215,7 @@
 #ava-box img{
     width: 120px;
     border-radius: 50%;
-    box-shadow: 0px 0px 25px #7c7c7c;
+    box-shadow: 0px 0px 20px #7c7c7c;
     margin: 20px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -273,8 +294,4 @@
     font-size: 14px;
     user-select: none;
     color: rgba(178, 178, 178, 0.75);
-}
-
-#nickname-input{
-    margin-top: 14px;
 }

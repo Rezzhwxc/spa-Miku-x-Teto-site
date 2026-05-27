@@ -2,32 +2,68 @@
 
 function runProfilePage() {
     console.log('[PROFILE] инициализация');
+    // ★ ПРОВЕРКА АВТОРИЗАЦИИ ★
+const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
+const userId = localStorage.getItem('user_id');
+
+if (!isLoggedIn || !userId) {
+    console.warn('[PROFILE] Пользователь не авторизован');
+    if (typeof window.showToast === 'function') {
+        window.showToast('Сначала войдите в аккаунт', 'error');
+    }
+    // Очищаем содержимое страницы профиля
+    const scrollBox = document.querySelector('.scroll-box');
+    if (scrollBox) {
+        scrollBox.innerHTML = `
+            <div style="text-align:center;padding:50px;color:#e6e3e3;font-family:unbound">
+                ⚠️ Доступ запрещён.<br>
+                <a href="/index" style="color:#10dfd8; text-decoration:none;">Вернуться на главную</a>
+            </div>
+        `;
+    }
+    // Перенаправляем через 1 секунду (чтобы пользователь увидел сообщение)
+    setTimeout(() => {
+        if (typeof window.navigateTo === 'function') {
+            window.navigateTo('/index');
+        } else {
+            window.location.href = '/index';
+        }
+    }, 1000);
+    return;
+}
 
     // ========== 0. ДАННЫЕ ПОЛЬЗОВАТЕЛЯ ИЗ localStorage ==========
     const currentUserId = localStorage.getItem('user_id');
     const currentEmail = localStorage.getItem('user_email');
-    let currentName = localStorage.getItem('user_name'); // может быть null
+    let currentName = localStorage.getItem('user_name');
 
     function getDisplayName() {
         if (currentName && currentName !== 'null' && currentName.trim() !== '') {
             return currentName;
         } else if (currentEmail) {
             return currentEmail.split('@')[0];
-        } else {
-            return 'Гость';
-        }
+        } 
     }
 
     // ========== 1. ОТОБРАЖЕНИЕ НИКА ==========
-    const nicknameEl = document.getElementById('nickname');
-    if (nicknameEl) {
-        nicknameEl.textContent = getDisplayName();
+    function updateNicknameDisplay() {
+        const nicknameEl = document.getElementById('nickname');
+        if (nicknameEl) nicknameEl.textContent = getDisplayName();
     }
+    updateNicknameDisplay();
 
     // ========== 2. РЕДАКТИРОВАНИЕ НИКА ==========
     const editBtn = document.getElementById('edit-nickname');
     if (editBtn && currentUserId) {
-        editBtn.addEventListener('click', () => {
+        // Удаляем старый обработчик, если есть, чтобы не дублировать
+        if (editBtn._nickEditHandler) {
+            editBtn.removeEventListener('click', editBtn._nickEditHandler);
+        }
+
+        const editHandler = () => {
+            // Каждый раз заново получаем актуальный элемент
+            const nicknameEl = document.getElementById('nickname');
+            if (!nicknameEl) return;
             if (document.getElementById('nickname-input')) return;
 
             const current = getDisplayName();
@@ -35,25 +71,10 @@ function runProfilePage() {
             input.id = 'nickname-input';
             input.type = 'text';
             input.value = current;
-            input.maxLength = 32;
+            input.maxLength = 10;
             input.placeholder = 'Введите новое имя...';
 
-            Object.assign(input.style, {
-                background: 'none',
-                border: '2px solid #393939',
-                borderRadius: '12px',
-                color: '#eaeaeaee',
-                fontFamily: "'Unbounded', monospace",
-                fontSize: '25px',
-                fontWeight: '600',
-                letterSpacing: '1px',
-                padding: '8px 18px',
-                outline: 'none',
-                textAlign: 'center',
-                width: '340px'
-            });
-
-            if (nicknameEl) nicknameEl.replaceWith(input);
+            nicknameEl.replaceWith(input);
             input.focus();
             input.select();
 
@@ -64,56 +85,79 @@ function runProfilePage() {
                 input.replaceWith(p);
             }
 
-            async function save() {
-                const newName = input.value.trim();
-                if (!newName) {
-                    showToast('Имя не может быть пустым', 'error');
-                    restoreNickname(current);
-                    return;
-                }
-                if (newName === current) {
-                    restoreNickname(current);
-                    return;
-                }
+            let isSaving = false; // флаг для предотвращения двойного сохранения
 
-                try {
-                    const response = await fetch('/api/update_profile', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ user_id: currentUserId, name: newName })
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                        localStorage.setItem('user_name', newName);
-                        currentName = newName;
-                        showToast('Имя успешно изменено!', 'success');
-                        restoreNickname(newName);
-                        // Обновляем кнопку регистрации в сайдбаре
-                        const regBtn = document.getElementById('regjs');
-                        if (regBtn && localStorage.getItem('is_logged_in') === 'true') {
-                            const email = localStorage.getItem('user_email') || '';
-                            regBtn.innerHTML = `<img class="reg" src="/static/img/add-user (1).png">${newName || email.split('@')[0]}`;
-                        }
-                    } else {
-                        showToast(data.error || 'Ошибка обновления', 'error');
-                        restoreNickname(current);
-                    }
-                } catch (err) {
-                    console.error(err);
-                    showToast('Ошибка соединения с сервером', 'error');
-                    restoreNickname(current);
-                }
+async function save() {
+    if (isSaving) return;
+    isSaving = true;
+
+    const newName = input.value.trim();
+    if (!newName) {
+        window.showToast('Имя не может быть пустым', 'error');
+        restoreNickname(current);
+        isSaving = false;
+        return;
+    }
+    if (newName.length > 10) {
+        window.showToast('Имя не может быть длиннее 10 символов', 'error');
+        restoreNickname(current);
+        isSaving = false;
+        return;
+    }
+    const invalidChars = /[<>\"'&%$#@!*()\\/;=`]/g;
+    if (invalidChars.test(newName)) {
+        window.showToast('Имя содержит недопустимые символы', 'error');
+        restoreNickname(current);
+        isSaving = false;
+        return;
+    }
+    if (newName === current) {
+        restoreNickname(current);
+        isSaving = false;
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/update_profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: currentUserId, name: newName })
+        });
+        const data = await response.json();
+        if (data.success) {
+            localStorage.setItem('user_name', newName);
+            currentName = newName;
+            window.showToast('Имя успешно изменено!', 'success');
+            restoreNickname(newName);
+            const regBtn = document.getElementById('regjs');
+            if (regBtn && localStorage.getItem('is_logged_in') === 'true') {
+                const email = localStorage.getItem('user_email') || '';
+                regBtn.innerHTML = `<img class="reg" src="/static/img/add-user (1).png">${newName || email.split('@')[0]}`;
             }
+        } else {
+            window.showToast(data.error || 'Ошибка обновления', 'error');
+            restoreNickname(current);
+        }
+    } catch (err) {
+        console.error(err);
+        window.showToast('Ошибка соединения с сервером', 'error');
+        restoreNickname(current);
+    }
+    isSaving = false;
+}
 
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') { e.preventDefault(); save(); }
                 if (e.key === 'Escape') { restoreNickname(current); }
             });
             input.addEventListener('blur', () => setTimeout(save, 120));
-        });
+        };
+
+        editBtn._nickEditHandler = editHandler;
+        editBtn.addEventListener('click', editHandler);
     }
 
-    // ========== 3. АВАТАРКА (существующий код, без изменений) ==========
+    // ========== 3. АВАТАРКА (без изменений) ==========
     const avatarImg = document.getElementById('box-avatar');
     const avaBox = document.getElementById('ava-box');
 
@@ -122,7 +166,6 @@ function runProfilePage() {
         return;
     }
 
-    // Настройка CSS для плавной анимации
     avaBox.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
     avaBox.style.opacity = '0';
     avaBox.style.transform = 'scale(0.95)';
@@ -144,7 +187,6 @@ function runProfilePage() {
         }, 250);
     }
 
-    // Открытие/закрытие по клику на аватарку
     avatarImg.addEventListener('click', function(e) {
         e.stopPropagation();
         if (avaBox.style.display === 'none' || avaBox.style.opacity === '0') {
@@ -154,7 +196,6 @@ function runProfilePage() {
         }
     });
 
-    // Закрытие при клике вне бокса
     document.addEventListener('click', function(e) {
         if (avaBox.style.display === 'block' && avaBox.style.opacity === '1') {
             if (!avatarImg.contains(e.target) && !avaBox.contains(e.target)) {
@@ -163,10 +204,7 @@ function runProfilePage() {
         }
     });
 
-    // Выбор аватарки
     const avatarOptions = document.querySelectorAll('#ava-box .img img');
-
-    // Восстанавливаем сохранённую аватарку из localStorage
     const savedAvatar = localStorage.getItem('user_avatar');
     if (savedAvatar && savedAvatar !== avatarImg.src) {
         avatarImg.src = savedAvatar;
@@ -188,5 +226,4 @@ function runProfilePage() {
     });
 }
 
-// Делаем функцию доступной глобально (вызывается из spa.js)
 window.runProfilePage = runProfilePage;

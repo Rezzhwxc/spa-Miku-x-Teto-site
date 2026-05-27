@@ -167,6 +167,21 @@ async function navigateTo(path, pushState = true) {
         return;
     }
 
+        // В начале функции navigateTo, после получения route
+        if (path === '/profile') {
+        const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
+        const userId = localStorage.getItem('user_id');
+        if (!isLoggedIn || !userId) {
+            if (typeof window.showToast === 'function') {
+                window.showToast('Сначала войдите в аккаунт', 'error');
+            } else {
+                alert('Сначала войдите в аккаунт');
+            }
+            // Отменяем навигацию
+            return;
+        }
+    }
+
     log('→', path, '| fetching /api/fragment/' + route.fragment);
     isFetching = true;
     loaderStart();
@@ -388,3 +403,5 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 log('boot | path:', location.pathname);
 history.replaceState({ path: normalizePath(location.pathname) }, document.title, location.pathname);
 navigateTo(normalizePath(location.pathname), false);
+
+window.navigateTo = navigateTo;

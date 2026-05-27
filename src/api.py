@@ -174,8 +174,12 @@ def update_profile():
         return jsonify({"success": False, "error": "user_id обязателен"}), 400
     if not name:
         return jsonify({"success": False, "error": "Имя не может быть пустым"}), 400
-    if len(name) > 100:
-        return jsonify({"success": False, "error": "Имя слишком длинное"}), 400
+    if len(name) > 10:
+        return jsonify({"success": False, "error": "Имя слишком длинное (макс. 10 символов)"}), 400
+
+    import re
+    if not re.match(r'^[a-zA-Zа-яёА-ЯЁ0-9 _-]+$', name):
+        return jsonify({"success": False, "error": "Имя может содержать только буквы, цифры, пробел, дефис и подчёркивание"}), 400
 
     try:
         conn = get_db_connection()
