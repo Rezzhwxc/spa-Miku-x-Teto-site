@@ -346,6 +346,7 @@ function playSongById(songId, autoPlay = true, fromFavorites = false) {
         currentAudio.src = `/play/${songId}`;
         currentSongId = songId;
         addToRecentSongs(songId);
+        updateRecentPlayed(songId);
         currentAudio.load();
         if (playerElements.progressBar) {
             playerElements.progressBar.value = 0;
@@ -387,126 +388,6 @@ function playPrevSong() {
     songNavLock = true;
     setTimeout(() => { songNavLock = false; }, 300);
 
-        // Режим избранного
-    if (window.isPlayingFromFavorites && window.currentFavoriteList.length) {
-        const favorites = window.currentFavoriteList;
-        if (playMode === 1) {
-            // Повтор одного трека – просто перезапускаем текущий
-            if (currentSongId && currentAudio) {
-                currentAudio.currentTime = 0;
-                currentAudio.play();
-            }
-            syncGlobals();
-            return;
-        }
-
-        let prevSong = null;
-        if (playMode === 2) {
-            // Случайный режим: выбираем случайный трек, отличный от текущего
-            const otherSongs = favorites.filter(s => s.id !== currentSongId);
-            if (otherSongs.length) {
-                const randomIdx = Math.floor(Math.random() * otherSongs.length);
-                prevSong = otherSongs[randomIdx];
-            }
-        } else {
-            // Последовательный режим (playMode === 0)
-            const currentIndex = favorites.findIndex(s => s.id == currentSongId);
-            let prevIndex = currentIndex - 1;
-            if (prevIndex < 0) prevIndex = favorites.length - 1;
-            prevSong = favorites[prevIndex];
-        }
-        if (prevSong) playSongById(prevSong.id, true, true);
-        syncGlobals();
-        return;
-    }
-
-    // Обычный режим с фильтром по персонажу
-    if (playMode === 2) {
-        if (!originalSongsList.length) return;
-
-        usedSongsInShuffle = [];
-
-        let availableSongs = originalSongsList;
-        if (window.currentCharacterFilter) {
-            availableSongs = originalSongsList.filter(song => String(song.vocaloid_id) === String(window.currentCharacterFilter));
-        }
-
-        const otherSongs = availableSongs.filter(s => s.id !== currentSongId);
-        if (otherSongs.length === 0) return;
-
-        const randomIdx = Math.floor(Math.random() * otherSongs.length);
-        const randomSong = otherSongs[randomIdx];
-
-        if (currentSongId) usedSongsInShuffle.push(currentSongId);
-
-        playSongById(randomSong.id, true);
-        return;
-    }
-
-    let availableSongs = songsList;
-    if (window.currentCharacterFilter) {
-        availableSongs = songsList.filter(song => String(song.vocaloid_id) === String(window.currentCharacterFilter));
-    }
-
-    if (availableSongs.length === 0) return;
-
-    const currentIndex = availableSongs.findIndex(s => s.id == currentSongId);
-    let prevIndex;
-    if (currentIndex === -1) {
-        prevIndex = availableSongs.length - 1;
-    } else if (currentIndex > 0) {
-        prevIndex = currentIndex - 1;
-    } else {
-        prevIndex = availableSongs.length - 1;
-    }
-
-    const prevSong = availableSongs[prevIndex];
-    if (prevSong) playSongById(prevSong.id, true, true);
-    syncGlobals();
-}
-
-function playNextSong() {
-    if (songNavLock) return;
-    songNavLock = true;
-
-    setTimeout(() => {
-        songNavLock = false;
-    }, 300);
-
-            // Режим избранного
-    if (window.isPlayingFromFavorites && window.currentFavoriteList.length) {
-        const favorites = window.currentFavoriteList;
-        if (playMode === 1) {
-            // Повтор одного трека
-            if (currentSongId && currentAudio) {
-                currentAudio.currentTime = 0;
-                currentAudio.play();
-            }
-            syncGlobals();
-            return;
-        }
-
-        let nextSong = null;
-        if (playMode === 2) {
-            // Случайный режим
-            const otherSongs = favorites.filter(s => s.id !== currentSongId);
-            if (otherSongs.length) {
-                const randomIdx = Math.floor(Math.random() * otherSongs.length);
-                nextSong = otherSongs[randomIdx];
-            }
-        } else {
-            // Последовательный режим
-            const currentIndex = favorites.findIndex(s => s.id == currentSongId);
-            let nextIndex = currentIndex + 1;
-            if (nextIndex >= favorites.length) nextIndex = 0;
-            nextSong = favorites[nextIndex];
-        }
-        if (nextSong) playSongById(nextSong.id, true, true);
-        syncGlobals();
-        return;
-    }
-
-    // Обычный режим
     if (playMode === 1) {
         if (currentSongId && currentAudio) {
             currentAudio.currentTime = 0;
@@ -515,53 +396,84 @@ function playNextSong() {
         return;
     }
 
-    let availableSongs = songsList;
-    if (window.currentCharacterFilter) {
-        availableSongs = songsList.filter(song => String(song.vocaloid_id) === String(window.currentCharacterFilter));
-    }
-
-    if (availableSongs.length === 0) {
-        console.warn('Нет треков для текущего фильтра');
-        return;
-    }
-
-    if (playMode === 2) {
-        const lastThreeIds = usedSongsInShuffle.slice(-3);
-        const availableFiltered = availableSongs.filter(song =>
-            !lastThreeIds.includes(song.id) && song.id !== currentSongId
-        );
-
-        let nextSong;
-        if (availableFiltered.length === 0) {
-            const anyExceptCurrent = availableSongs.filter(song => song.id !== currentSongId);
-            if (anyExceptCurrent.length === 0) return;
-            nextSong = anyExceptCurrent[Math.floor(Math.random() * anyExceptCurrent.length)];
-        } else {
-            nextSong = availableFiltered[Math.floor(Math.random() * availableFiltered.length)];
-        }
-
-        if (currentSongId) {
-            usedSongsInShuffle.push(currentSongId);
-            if (usedSongsInShuffle.length > 10) usedSongsInShuffle.shift();
-        }
-
-        playSongById(nextSong.id, true);
-        return;
-    }
-
-    const currentIndex = availableSongs.findIndex(s => s.id == currentSongId);
-    let nextIndex;
-    if (currentIndex === -1) {
-        nextIndex = 0;
-    } else if (currentIndex < availableSongs.length - 1) {
-        nextIndex = currentIndex + 1;
+    let availableSongs = [];
+    if (window.isPlayingFromFavorites && window.currentFavoriteList.length) {
+        availableSongs = window.currentFavoriteList;
+    } else if (window.currentCharacterFilter) {
+        availableSongs = songsList.filter(s => String(s.vocaloid_id) === String(window.currentCharacterFilter));
     } else {
-        nextIndex = 0;
+        availableSongs = songsList;
     }
 
-    const nextSong = availableSongs[nextIndex];
-    if (nextSong) playSongById(nextSong.id, true);
-    syncGlobals();
+    if (!availableSongs.length) return;
+
+    let prevSong = null;
+    if (playMode === 2) {
+        // Для случайного режима выбираем случайный трек, не входящий в последние 3
+        const candidates = availableSongs.filter(s => !window.recentPlayedIds.includes(s.id) && s.id !== currentSongId);
+        if (candidates.length) {
+            const randomIndex = Math.floor(Math.random() * candidates.length);
+            prevSong = candidates[randomIndex];
+        } else {
+            const anyExceptCurrent = availableSongs.filter(s => s.id !== currentSongId);
+            if (anyExceptCurrent.length) {
+                prevSong = anyExceptCurrent[Math.floor(Math.random() * anyExceptCurrent.length)];
+            }
+        }
+    } else {
+        prevSong = getPrevSongNoRepeat(availableSongs, currentSongId);
+    }
+
+    if (prevSong) playSongById(prevSong.id, true, window.isPlayingFromFavorites);
+}
+
+
+function playNextSong() {
+    if (songNavLock) return;
+    songNavLock = true;
+    setTimeout(() => { songNavLock = false; }, 300);
+
+    // Режим повтора одного трека
+    if (playMode === 1) {
+        if (currentSongId && currentAudio) {
+            currentAudio.currentTime = 0;
+            currentAudio.play();
+        }
+        return;
+    }
+
+    // Определяем доступный список треков (с учётом избранного или фильтра)
+    let availableSongs = [];
+    if (window.isPlayingFromFavorites && window.currentFavoriteList.length) {
+        availableSongs = window.currentFavoriteList;
+    } else if (window.currentCharacterFilter) {
+        availableSongs = songsList.filter(s => String(s.vocaloid_id) === String(window.currentCharacterFilter));
+    } else {
+        availableSongs = songsList;
+    }
+
+    if (!availableSongs.length) return;
+
+    let nextSong = null;
+    if (playMode === 2) {
+        // Случайный режим – выбираем случайный трек, которого нет в последних 3
+        const candidates = availableSongs.filter(s => !window.recentPlayedIds.includes(s.id) && s.id !== currentSongId);
+        if (candidates.length) {
+            const randomIndex = Math.floor(Math.random() * candidates.length);
+            nextSong = candidates[randomIndex];
+        } else {
+            // Если все треки в недавних – берём любой, кроме текущего
+            const anyExceptCurrent = availableSongs.filter(s => s.id !== currentSongId);
+            if (anyExceptCurrent.length) {
+                nextSong = anyExceptCurrent[Math.floor(Math.random() * anyExceptCurrent.length)];
+            }
+        }
+    } else {
+        // Последовательный режим (playMode === 0) – идём по порядку, но пропускаем недавние
+        nextSong = getNextSongNoRepeat(availableSongs, currentSongId);
+    }
+
+    if (nextSong) playSongById(nextSong.id, true, window.isPlayingFromFavorites);
 }
 
 function seekTo() {
@@ -1052,6 +964,58 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// ─── НЕ ПОВТОРЯТЬ ПОСЛЕДНИЕ 3 ТРЕКА ────────────────────────────────────────
+window.recentPlayedIds = window.recentPlayedIds || [];
+
+function updateRecentPlayed(songId) {
+    // Удаляем старый ID, если он уже был
+    const index = window.recentPlayedIds.indexOf(songId);
+    if (index !== -1) window.recentPlayedIds.splice(index, 1);
+    // Добавляем в начало
+    window.recentPlayedIds.unshift(songId);
+    // Храним только последние 3
+    if (window.recentPlayedIds.length > 3) window.recentPlayedIds.pop();
+    console.log('[RECENT] now:', window.recentPlayedIds);
+}
+
+// Возвращает следующий трек, не входящий в recentPlayedIds (если возможно)
+function getNextSongNoRepeat(availableSongs, currentId) {
+    if (!availableSongs.length) return null;
+    // Находим индекс текущего трека
+    let currentIndex = availableSongs.findIndex(s => s.id == currentId);
+    if (currentIndex === -1) currentIndex = 0;
+
+    // Пробуем последовательно, начиная со следующего, с зацикливанием
+    for (let i = 1; i <= availableSongs.length; i++) {
+        const nextIndex = (currentIndex + i) % availableSongs.length;
+        const candidate = availableSongs[nextIndex];
+        if (!window.recentPlayedIds.includes(candidate.id)) {
+            return candidate;
+        }
+    }
+    // Если все треки в "недавних" – берём любой следующий
+    const fallbackIndex = (currentIndex + 1) % availableSongs.length;
+    return availableSongs[fallbackIndex];
+}
+
+// Возвращает предыдущий трек, не входящий в recentPlayedIds (если возможно)
+function getPrevSongNoRepeat(availableSongs, currentId) {
+    if (!availableSongs.length) return null;
+    let currentIndex = availableSongs.findIndex(s => s.id == currentId);
+    if (currentIndex === -1) currentIndex = 0;
+
+    for (let i = 1; i <= availableSongs.length; i++) {
+        let prevIndex = currentIndex - i;
+        if (prevIndex < 0) prevIndex += availableSongs.length;
+        const candidate = availableSongs[prevIndex];
+        if (!window.recentPlayedIds.includes(candidate.id)) {
+            return candidate;
+        }
+    }
+    const fallbackIndex = currentIndex - 1;
+    if (fallbackIndex < 0) return availableSongs[availableSongs.length - 1];
+    return availableSongs[fallbackIndex];
+}
 
 
 const volumeSlider = document.getElementById('volumeSlider');
