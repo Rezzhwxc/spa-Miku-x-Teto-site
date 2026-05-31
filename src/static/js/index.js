@@ -141,18 +141,17 @@ function initCirculindex() {
         const charId = circul.dataset.character;
         setCirculCover(circul, charId);
 
-        // Убираем старые обработчики (на случай повторного вызова)
         if (circul._indexClickHandler) {
             circul.removeEventListener('click', circul._indexClickHandler);
         }
         const clickHandler = (e) => {
             if (e.target.closest('.startstop')) return;
+            if (e.target.closest('.txtindex')) return;  
             filterByCharacter(charId);
         };
         circul._indexClickHandler = clickHandler;
         circul.addEventListener('click', clickHandler);
 
-        // Кнопка Play внутри круга
         const btn = circul.querySelector('.startstop');
         if (btn) {
             if (btn._indexPlayHandler) {

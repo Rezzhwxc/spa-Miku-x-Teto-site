@@ -169,6 +169,8 @@
     letter-spacing: 2px;
     text-transform: uppercase;
     transition: all 0.2s ease;
+
+    cursor: default;
 }
 .sp1, .sp2, .sp3 {
     transition: all 0.2s ease;
@@ -258,7 +260,7 @@
 }
 #avatar:hover {
     scale: 1.05;
-    box-shadow: 0px 0px 15px 0px rgba(255, 255, 255, 0.5);
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.9);
 }
 
 .hover:hover .soob {
@@ -352,7 +354,7 @@
 .about-box{
     margin-top: 40px;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-evenly;
     font-family: 'unbound';
 }
 @keyframes subtlePulse {
@@ -361,7 +363,7 @@
     100% { box-shadow: 0 0 10px 1px rgba(255, 255, 255, 0.15); }
 }
 .aboutuser{
-    width: 400px;
+    width: 330px;
     border-radius: 50%;
     margin: 20px;
     animation: subtlePulse 2s ease-in-out infinite alternate;
@@ -371,7 +373,7 @@
     text-align: center;
     font-size: 26px;
     letter-spacing: 2px;
-    background: linear-gradient(50deg, #00ffff, rgba(196, 32, 32, 0.911), #00ffff);
+    background: linear-gradient(50deg, #e1e1e1, rgb(76, 76, 76), #e1e1e1);
     background-size: 200% 200%;
     -webkit-background-clip: text;
     background-clip: text;
@@ -393,7 +395,7 @@
     color: #ffffff;
 }
 
-#podrob1, #podrob2{
+#podrob1, #podrob2, #podrob3{
     justify-self: center;
     width: fit-content;
     padding: 5px;
@@ -404,7 +406,7 @@
     cursor: pointer;
     transition: all 0.2s ease;
 }
-#podrob1:hover, #podrob2:hover{
+#podrob1:hover, #podrob2:hover, #podrob3:hover{
     scale: 1.03;
     color: #e5e5e5;
 }
@@ -414,6 +416,7 @@
 footer{
     border-top: 2px solid rgba(55, 213, 182, 0.8);
     padding-top: 20px;
+    margin-top: 20px;
 }
 
 .mark{

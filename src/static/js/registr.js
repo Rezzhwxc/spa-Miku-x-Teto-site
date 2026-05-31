@@ -231,6 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('user_name');
         localStorage.removeItem('is_logged_in');
         localStorage.removeItem('user_avatar');
+        localStorage.removeItem('recent_songs');
         
         const regBtn = document.getElementById('regjs');
         if (regBtn) {

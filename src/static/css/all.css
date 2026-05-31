@@ -533,7 +533,7 @@ input[type="search"]::-webkit-search-decoration {
     font-family: 'unbound';
     font-size: 19px;
     background: linear-gradient(135deg, #242424de, #2b2b2bdd);
-    max-height: 450px;
+    max-height: 500px;
     overflow-y: auto;
     z-index: 100;
     box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
@@ -659,7 +659,7 @@ input[type="search"]::-webkit-search-decoration {
 }
 
 .toast-notification.error {
-    border-color: rgba(226, 49, 49, 0.5);
+    border-color: rgba(226, 49, 49, 0.6);
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
 }
 

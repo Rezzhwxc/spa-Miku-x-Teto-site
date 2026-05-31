@@ -763,22 +763,38 @@ function attachButtonHandlers() {
 
 function attachCirculBoxHandlers() {
     document.querySelectorAll('.circul').forEach(circul => {
+        // Удаляем старый обработчик, если есть
         if (circul._clickHandler) {
             circul.removeEventListener('click', circul._clickHandler);
         }
+
         const handler = (e) => {
-            if (e.target.closest('.startstop')) return;
-            circul.classList.add('circul-click-animation');
-            setTimeout(() => circul.classList.remove('circul-click-animation'), 200);
+            // Разрешаем клик только по обложке или кнопке
+            const isCover = e.target.closest('.circul-cover');
+            const isButton = e.target.closest('.startstop');
+
+            if (!isCover && !isButton) return;
+            if (isCover) {
+                circul.classList.add('circul-click-animation');
+                setTimeout(() => circul.classList.remove('circul-click-animation'), 200);
+            }
+
             const songId = parseInt(circul.dataset.id);
             if (!songId) return;
-            if (currentSongId === songId && currentAudio && !currentAudio.paused) currentAudio.pause();
-            else if (currentSongId === songId && currentAudio && currentAudio.paused) currentAudio.play();
-            else playSongById(songId, true);
+
+            // Управление воспроизведением
+            if (currentSongId === songId && currentAudio && !currentAudio.paused) {
+                currentAudio.pause();
+            } else if (currentSongId === songId && currentAudio && currentAudio.paused) {
+                currentAudio.play();
+            } else {
+                playSongById(songId, true);
+            }
         };
+
         circul._clickHandler = handler;
         circul.addEventListener('click', handler);
-        circul.style.cursor = 'pointer';
+        circul.style.cursor = 'default';
     });
 }
 

@@ -220,6 +220,8 @@ async function save() {
                 if (typeof window.showToast === 'function') {
                     window.showToast('Аватар сохранён!', 'success');
                 }
+                const mainAvatar = document.getElementById('avatar');
+                if (mainAvatar) mainAvatar.src = newSrc;
             } else {
                 console.warn('Не удалось сохранить аватар на сервере');
             }
@@ -285,6 +287,7 @@ async function handleDeleteConfirm() {
                 localStorage.removeItem('user_name');
                 localStorage.removeItem('is_logged_in');
                 localStorage.removeItem('user_avatar');
+                localStorage.removeItem('recent_songs');
                 // перенаправляем на главную
                 setTimeout(() => {
                     window.location.href = '/index';

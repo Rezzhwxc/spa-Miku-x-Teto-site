@@ -30,6 +30,7 @@
     box-shadow: 0 0 50px 0px rgba(224, 224, 224, 0.464);
     transition: all 0.2s ease;
     border-radius: 50%;
+    cursor: pointer;
 }
 .circul-cover:active {
     transform: scale(0.95);

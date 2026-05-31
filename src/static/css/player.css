@@ -236,7 +236,7 @@
 }
 
 .progress-slider::-webkit-slider-runnable-track {
-    background: linear-gradient(to right, #10dfd8bc 0%, #de1717c6 var(--progress, 0%), rgba(255, 255, 255, 0.24) var(--progress, 0%));
+    background: linear-gradient(to right, #10dfd8 0%, #eb1616 var(--progress, 0%), rgba(255, 255, 255, 0.3) var(--progress, 0%));
 }
 
 .progress-slider::-moz-range-progress {
@@ -316,7 +316,7 @@
 }
 
 .volume-slider::-webkit-slider-runnable-track {
-    background: linear-gradient(to right, #e1e1e1 0%, rgb(59, 59, 59) var(--volume, 0%), rgba(255, 255, 255, 0.24) var(--volume, 0%));
+    background: linear-gradient(to right, #e1e1e1 0%, rgb(59, 59, 59) var(--volume, 0%), rgba(255, 255, 255, 0.3) var(--volume, 0%));
 }
 
 .volume-slider::-moz-range-progress {
