@@ -183,7 +183,10 @@
         <h2>Вход в аккаунт</h2>
         <form id="login-form">
             <input type="email" name="email" placeholder="Email" required />
-            <input type="password" name="password" placeholder="Пароль" required minlength="6" />
+                <input type="password" id="login-password" name="password" placeholder="Пароль" required minlength="6" />
+                <button type="button" class="toggle-password" data-target="login-password">
+                    <img src="/static/img/hide.png" alt="Показать пароль">
+                </button>
             <button type="submit">Войти</button>
         </form>
         <button type="button" id="open-register">Регистрация</button>
@@ -198,8 +201,14 @@
         <h2>Регистрация</h2>
         <form id="register-form">
             <input type="email" name="email" placeholder="Email" required />
-            <input type="password" name="password" placeholder="Пароль" required minlength="6" />
-            <input type="password" name="confirm-password" placeholder="Подтверждение пароля" required />
+                <input type="password" id="reg-password" name="password" placeholder="Пароль" required minlength="6" />
+                <button type="button" class="toggle-password" data-target="reg-password">
+                    <img src="/static/img/hide.png" alt="Показать пароль">
+                </button>
+                <input type="password" id="reg-confirm-password" name="confirm-password" placeholder="Подтверждение пароля" required />
+                <button type="button" class="toggle-password" data-target="reg-confirm-password">
+                    <img src="/static/img/hide.png" alt="Показать пароль">
+                </button>
             <button type="submit">Подтвердить</button>
         </form>
         <button type="button" id="back-to-login">Уже есть аккаунт?<br> Войти</button>

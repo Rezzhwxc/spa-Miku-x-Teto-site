@@ -425,7 +425,7 @@ img{user-select: none; -webkit-user-drag: none;}
   padding: 14px;
   margin-bottom: 24px;
   border: 2px solid #4646466c;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #2e2e2e6c;
   color: #d3d3d3;
   box-sizing: border-box;
@@ -444,7 +444,11 @@ img{user-select: none; -webkit-user-drag: none;}
     inset 0 2px 3px -1px rgba(55, 213, 182, 0.844),   
     inset 0 -2px 3px -1px rgba(226, 49, 49, 0.844); 
 }
-.modal button {
+
+button[type="submit"] {
+  display: block;
+  margin: 0 auto;
+  margin-top: 12px;
   width: 80%;
   padding: 12px;
   border: none;
@@ -453,22 +457,23 @@ img{user-select: none; -webkit-user-drag: none;}
   color: #d3d3d3; font-family: 'Unbound';
   cursor: pointer;
 }
-
-button[type="submit"] {
-  display: block;
-  margin: 0 auto;
-  margin-top: 12px;
-}
 button[type="submit"]:hover{
   background: radial-gradient(circle at top left, rgba(39, 39, 39, 0.685),
   rgba(61, 61, 61, 0.568),
   rgba(39, 39, 39, 0.685) );
 }
-button[type="button"] {
+#open-register, #back-to-login{
   background: #212122;
-  margin: 15px 0px; 
+  margin: 15px 0px;
+  width: 80%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: radial-gradient(circle at top left, rgba(39, 39, 39, 0.685),rgba(27, 27, 27, 0.568),rgba(39, 39, 39, 0.685) );
+  color: #d3d3d3; font-family: 'Unbound';
+  cursor: pointer;
 }
-button[type="button"]:hover{
+#open-register:hover, #back-to-login:hover{
   background: radial-gradient(circle at top left, rgba(39, 39, 39, 0.685),
   rgba(61, 61, 61, 0.568),
   rgba(39, 39, 39, 0.685) );
@@ -483,6 +488,33 @@ button[type="button"]:hover{
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+}
+
+/* Контейнер для поля пароля с кнопкой */
+.toggle-password {
+    position: absolute;
+    right: 60px;
+    top: 55.8%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+    transition: all 0.2s ease;
+}
+
+.toggle-password:hover {
+    opacity: 1;
+}
+
+.toggle-password img {
+    width: 30px;
+    height: 30px;
+    pointer-events: none;
 }
 
 /* search */
