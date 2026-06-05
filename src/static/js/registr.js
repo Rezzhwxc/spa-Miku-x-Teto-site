@@ -256,27 +256,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ========== ПОКАЗ / СКРЫТИЕ ПАРОЛЯ ==========
     function initPasswordToggles() {
-        const toggles = document.querySelectorAll('.toggle-password');
-        toggles.forEach(btn => {
-            if (btn._toggleHandler) {
-                btn.removeEventListener('click', btn._toggleHandler);
+    const toggles = document.querySelectorAll('.toggle-password, .toggle-passwordreg, .toggle-passwordreg2');
+    toggles.forEach(btn => {
+        if (btn._toggleHandler) {
+            btn.removeEventListener('click', btn._toggleHandler);
+        }
+        const handler = (e) => {
+            e.preventDefault();
+            const targetId = btn.dataset.target;
+            const input = document.getElementById(targetId);
+            if (!input) return;
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            const img = btn.querySelector('img');
+            if (img) {
+                img.src = isPassword ? '/static/img/view.png' : '/static/img/hide.png';
             }
-            const handler = (e) => {
-                e.preventDefault();
-                const targetId = btn.dataset.target;
-                const input = document.getElementById(targetId);
-                if (!input) return;
-                const isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
-                const img = btn.querySelector('img');
-                if (img) {
-                    img.src = isPassword ? '/static/img/view.png' :  '/static/img/hide.png';
-                }
-            };
-            btn._toggleHandler = handler;
-            btn.addEventListener('click', handler);
-        });
-    }
+        };
+        btn._toggleHandler = handler;
+        btn.addEventListener('click', handler);
+    });
+}
 
     // Вызываем инициализацию переключателей пароля
     initPasswordToggles();

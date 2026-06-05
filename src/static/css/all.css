@@ -491,11 +491,7 @@ button[type="submit"]:hover{
 }
 
 /* Контейнер для поля пароля с кнопкой */
-.toggle-password {
-    position: absolute;
-    right: 60px;
-    top: 55.8%;
-    transform: translateY(-50%);
+.toggle-password, .toggle-passwordreg, .toggle-passwordreg2 {
     background: none;
     border: none;
     cursor: pointer;
@@ -506,12 +502,30 @@ button[type="submit"]:hover{
     opacity: 0.6;
     transition: all 0.2s ease;
 }
+.toggle-password{
+    position: absolute;
+    right: 60px;
+    top: 55.8%;
+    transform: translateY(-50%);
+}
+.toggle-passwordreg{
+    position: absolute;
+    right: 60px;
+    top: 46.5%;
+    transform: translateY(-50%);
+}
+.toggle-passwordreg2{
+    position: absolute;
+    right: 60px;
+    top: 60.6%;
+    transform: translateY(-50%);
+}
 
-.toggle-password:hover {
+.toggle-password:hover, .toggle-passwordreg:hover, .toggle-passwordreg2:hover {
     opacity: 1;
 }
 
-.toggle-password img {
+.toggle-password img, .toggle-passwordreg img, .toggle-passwordreg2 img {
     width: 30px;
     height: 30px;
     pointer-events: none;
