@@ -92,6 +92,34 @@ const playerElements = {
 const formatTime = (sec) => isNaN(sec) ? '0:00' : `${Math.floor(sec / 60)}:${Math.floor(sec % 60).toString().padStart(2, '0')}`;
 const escapeHtml = (text) => text ? new Option(text).innerHTML : '';
 
+// Проверка, нужно ли включить бегущую строку для названия трека
+function checkAndRunMarquee(titleEl) {
+    if (!titleEl) return;
+    const container = titleEl.closest('.player-info');
+    if (!container) return;
+    const span = titleEl.querySelector('span');
+    const isOverflow = titleEl.scrollWidth > container.clientWidth;
+    if (isOverflow) {
+        titleEl.classList.add('long-title');
+        const duration = Math.max(5, titleEl.scrollWidth / 30);
+        if (span) span.style.animationDuration = duration + 's';
+    } else {
+        titleEl.classList.remove('long-title');
+        if (span) span.style.animationDuration = '';
+    }
+}
+
+// Добавляем возможность перехода по ссылке автора в плеере
+if (playerElements.artist) {
+    playerElements.artist.style.cursor = 'pointer';
+    playerElements.artist.addEventListener('click', (e) => {
+        const url = playerElements.artist.dataset.vocaloidUrl;
+        if (url && url !== '#') {
+            window.location.href = url; // открыть в новой вкладке
+        }
+    });
+}
+
 function saveOriginalOrder() {
     if (originalSongsList.length === 0 && songsList.length) originalSongsList = [...songsList];
 }
@@ -241,8 +269,15 @@ function updatePlayerUI(song, opts = {}) {
     const coverEl = playerElements.cover;
 
     if (restoreOnly) {
-        if (titleEl) titleEl.textContent = song.name || '—';
-        if (artistEl) artistEl.textContent = song.vocaloid_name || 'Vocaloid';
+        if (titleEl) {
+            const span = titleEl.querySelector('span') || titleEl;
+            span.textContent = song.name || '—';
+            checkAndRunMarquee(titleEl);
+        }
+        if (artistEl) {
+            artistEl.textContent = song.vocaloid_name || 'Vocaloid';
+            artistEl.dataset.vocaloidUrl = song.vocaloid_url || '#';   // ★ добавлено
+        }
         if (coverEl) coverEl.src = song.photo ? `/photo/${song.photo}` : '/static/img/default-cover.png';
         if (playerElements.nowPlayingBar) playerElements.nowPlayingBar.style.display = 'block';
         if ('mediaSession' in navigator) updateMediaSession(song);
@@ -264,9 +299,15 @@ function updatePlayerUI(song, opts = {}) {
     coverEl?.classList.add('slide-out-left');
 
     window._playerUpdateTimer = setTimeout(() => {
-    if (titleEl) titleEl.textContent = song.name || '—';
-    if (artistEl) artistEl.textContent = song.vocaloid_name || 'Vocaloid';
-    if (coverEl) coverEl.src = song.photo ? `/photo/${song.photo}` : '/static/img/default-cover.png';
+        if (titleEl) {
+            const span = titleEl.querySelector('span') || titleEl;
+            span.textContent = song.name || '—';
+        }
+        if (artistEl) {
+            artistEl.textContent = song.vocaloid_name || 'Vocaloid';
+            artistEl.dataset.vocaloidUrl = song.vocaloid_url || '#';   // ★ добавлено
+        }
+        if (coverEl) coverEl.src = song.photo ? `/photo/${song.photo}` : '/static/img/default-cover.png';
 
         titleEl?.classList.remove('fade-out');
         artistEl?.classList.remove('fade-out');
@@ -279,6 +320,9 @@ function updatePlayerUI(song, opts = {}) {
         titleEl?.classList.add('fade-in');
         artistEl?.classList.add('fade-in');
         coverEl?.classList.add('slide-in-left');
+
+        // Запускаем marquee после начала fade-in, чтобы не прерывать анимацию появления
+        if (titleEl) checkAndRunMarquee(titleEl);
 
         window._playerUpdateAnimationTimer = setTimeout(() => {
             titleEl?.classList.remove('fade-in');
@@ -421,7 +465,10 @@ function playPrevSong() {
             }
         }
     } else {
-        prevSong = getPrevSongNoRepeat(availableSongs, currentSongId);
+        // Последовательный режим — просто шаг назад по индексу
+        const currentIndex = availableSongs.findIndex(s => s.id == currentSongId);
+        const prevIndex = currentIndex <= 0 ? availableSongs.length - 1 : currentIndex - 1;
+        prevSong = availableSongs[prevIndex];
     }
 
     if (prevSong) playSongById(prevSong.id, true, window.isPlayingFromFavorites);
@@ -469,8 +516,10 @@ function playNextSong() {
             }
         }
     } else {
-        // Последовательный режим (playMode === 0) – идём по порядку, но пропускаем недавние
-        nextSong = getNextSongNoRepeat(availableSongs, currentSongId);
+        // Последовательный режим (playMode === 0) – просто шаг вперёд по индексу
+        const currentIndex = availableSongs.findIndex(s => s.id == currentSongId);
+        const nextIndex = currentIndex >= availableSongs.length - 1 ? 0 : currentIndex + 1;
+        nextSong = availableSongs[nextIndex];
     }
 
     if (nextSong) playSongById(nextSong.id, true, window.isPlayingFromFavorites);
@@ -582,9 +631,14 @@ function togglePlayMode() {
         const currentSong = songsList.find(s => s.id == currentSongId);
         if (currentSong && playerElements.title) {
             if (playerElements.title) playerElements.title.textContent = currentSong.name || '—';
-            if (playerElements.artist) playerElements.artist.textContent = currentSong.vocaloid_name || 'Vocaloid';
+            if (playerElements.artist) {
+                playerElements.artist.textContent = currentSong.vocaloid_name || 'Vocaloid';
+                playerElements.artist.dataset.vocaloidUrl = currentSong.vocaloid_url || '#';   // ★ добавлено
+            }
         }
     }
+    if (playerElements.title) playerElements.title.textContent = currentSong.name || '—';
+    checkAndRunMarquee(playerElements.title);
     syncGlobals();
 }
 

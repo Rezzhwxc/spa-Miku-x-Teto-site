@@ -88,9 +88,36 @@
 
 /* Информация о треке */
 .player-info {
-    min-width: 168px;
-    max-width: 168px;
+    width: 168px;
     transition: all 0.15s ease;
+}
+
+/* Контейнер для названия трека */
+.player-title {
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 100%;
+    font-size: 28px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    color: rgba(255, 255, 255, 0.788);
+    margin-bottom: 4px;
+}
+
+/* Внутренний span, который будет двигаться */
+.player-title span {
+    display: inline-block;
+    white-space: nowrap;
+    will-change: transform;
+}
+
+/* Бегущая строка (если текст не помещается) */
+.player-title.long-title span {
+    animation: marquee-alternate 5s linear infinite alternate;
+}
+
+@keyframes marquee-alternate {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(-100% + 168px)); } /* 168px = ширина .player-info */
 }
 
 .player-info.fade-out {
@@ -116,6 +143,11 @@
     font-size: 22px;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     color: #8C8C8C;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.player-artist:hover{
+    color: #b3b3b3;
 }
 
 /* Кнопки управления */

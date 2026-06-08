@@ -118,111 +118,133 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape') hideAllModals();
     });
 
+    // Проверка, что пароль состоит только из латиницы, цифр и спецсимволов
+    function isAllowedPasswordChars(password) {
+        return /^[A-Za-z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]+$/.test(password);
+    }
+
     // ========== ЛОГИН ==========
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = loginForm.querySelector('input[name="email"]')?.value.trim().toLowerCase();
-            const password = loginForm.querySelector('input[name="password"]')?.value;
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = loginForm.querySelector('input[name="email"]')?.value.trim().toLowerCase();
+        const password = loginForm.querySelector('input[name="password"]')?.value;
 
-            if (!email || !password) {
-                showToast('Заполни email и пароль', 'error');
-                return;
-            }
-            if (!validateEmail(email)) {
-                showToast('Введите корректный email', 'error');
-                return;
-            }
-            if (!validatePassword(password)) {
-                showToast('Пароль должен быть минимум 6 символов', 'error');
-                return;
-            }
+        if (!email || !password) {
+            showToast('Заполни email и пароль', 'error');
+            return;
+        }
+        if (!validateEmail(email)) {
+            showToast('Введите корректный email', 'error');
+            return;
+        }
+        if (!validatePassword(password)) {
+            showToast('Пароль должен быть минимум 6 символов', 'error');
+            return;
+        }
 
-            try {
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    localStorage.setItem('user_email', data.email);
-                    localStorage.setItem('user_id', data.user_id);
-                    localStorage.setItem('user_name', data.name || '');
-                    localStorage.setItem('is_logged_in', 'true');
-                    localStorage.setItem('user_avatar', data.avatar || '/static/img/default.png');
-                    showToast('Добро пожаловать, ' + (data.name || email.split('@')[0]), 'success');
-                    hideAllModals();
-                    const regBtn = document.getElementById('regjs');
-                    if (regBtn) {
-                        const displayName = data.name || email.split('@')[0];
-                        regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">' + displayName;
-                    }
-                } else {
-                    showToast(data.error || 'Ошибка входа', 'error');
+        // ★ НЕОБЯЗАТЕЛЬНАЯ ПРОВЕРКА (если хотите единообразие) ★
+        if (!isAllowedPasswordChars(password)) {
+            showToast('Пароль может содержать только английские буквы, цифры и спецсимволы', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await response.json();
+            if (data.success) {
+                localStorage.setItem('user_email', data.email);
+                localStorage.setItem('user_id', data.user_id);
+                localStorage.setItem('user_name', data.name || '');
+                localStorage.setItem('is_logged_in', 'true');
+                localStorage.setItem('user_avatar', data.avatar || '/static/img/default.png');
+                showToast('Добро пожаловать, ' + (data.name || email.split('@')[0]), 'success');
+                hideAllModals();
+                const regBtn = document.getElementById('regjs');
+                if (regBtn) {
+                    const displayName = data.name || email.split('@')[0];
+                    regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">' + displayName;
                 }
-            } catch (err) {
-                console.error(err);
-                showToast('Ошибка соединения с сервером', 'error');
+            } else {
+                showToast(data.error || 'Ошибка входа', 'error');
             }
-        });
+        } catch (err) {
+            console.error(err);
+            showToast('Ошибка соединения с сервером', 'error');
+        }
+    });
+}
+
+    // Проверка, что пароль состоит только из латиницы, цифр и спецсимволов
+    function isAllowedPasswordChars(password) {
+        return /^[A-Za-z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]+$/.test(password);
     }
 
     // ========== РЕГИСТРАЦИЯ ==========
-    if (registerForm) {
-        registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = registerForm.querySelector('input[name="email"]')?.value.trim().toLowerCase();
-            const password = registerForm.querySelector('input[name="password"]')?.value;
-            const confirmPassword = registerForm.querySelector('input[name="confirm-password"]')?.value;
+if (registerForm) {
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = registerForm.querySelector('input[name="email"]')?.value.trim().toLowerCase();
+        const password = registerForm.querySelector('input[name="password"]')?.value;
+        const confirmPassword = registerForm.querySelector('input[name="confirm-password"]')?.value;
 
-            if (!email || !password || !confirmPassword) {
-                showToast('Заполни все поля', 'error');
-                return;
-            }
-            if (!validateEmail(email)) {
-                showToast('Введите корректный email', 'error');
-                return;
-            }
-            if (!validatePassword(password)) {
-                showToast('Пароль должен быть минимум 6 символов', 'error');
-                return;
-            }
-            if (password !== confirmPassword) {
-                showToast('Пароли не совпадают', 'error');
-                return;
-            }
+        if (!email || !password || !confirmPassword) {
+            showToast('Заполни все поля', 'error');
+            return;
+        }
+        if (!validateEmail(email)) {
+            showToast('Введите корректный email', 'error');
+            return;
+        }
+        if (!validatePassword(password)) {
+            showToast('Пароль должен быть минимум 6 символов', 'error');
+            return;
+        }
+        if (password !== confirmPassword) {
+            showToast('Пароли не совпадают', 'error');
+            return;
+        }
 
-            const tempName = email.split('@')[0];
+        // ★ ОБЯЗАТЕЛЬНАЯ ПРОВЕРКА: только латиница, цифры, спецсимволы ★
+        if (!isAllowedPasswordChars(password)) {
+            showToast('Пароль может содержать только английские буквы, цифры и спецсимволы (!@#$%^&* и т.д.)', 'error');
+            return;
+        }
 
-            try {
-                const response = await fetch('/api/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, name: tempName })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    localStorage.setItem('user_email', email);
-                    localStorage.setItem('user_id', data.user_id);
-                    localStorage.setItem('user_name', tempName);
-                    localStorage.setItem('is_logged_in', 'true');
-                    localStorage.setItem('user_avatar', data.avatar || '/static/img/default.png');
-                    showToast('Успешно! Добро пожаловать, ' + tempName + '^^', 'success');
-                    hideAllModals();
-                    const regBtn = document.getElementById('regjs');
-                    if (regBtn) {
-                        regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">' + tempName;
-                    }
-                } else {
-                    showToast(data.error || 'Ошибка регистрации', 'error');
+        const tempName = email.split('@')[0];
+
+        try {
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, name: tempName })
+            });
+            const data = await response.json();
+            if (data.success) {
+                localStorage.setItem('user_email', email);
+                localStorage.setItem('user_id', data.user_id);
+                localStorage.setItem('user_name', tempName);
+                localStorage.setItem('is_logged_in', 'true');
+                localStorage.setItem('user_avatar', data.avatar || '/static/img/default.png');
+                showToast('Успешно! Добро пожаловать, ' + tempName + '^^', 'success');
+                hideAllModals();
+                const regBtn = document.getElementById('regjs');
+                if (regBtn) {
+                    regBtn.innerHTML = '<img class="reg" src="/static/img/add-user (1).png">' + tempName;
                 }
-            } catch (err) {
-                console.error(err);
-                showToast('Ошибка соединения с сервером', 'error');
+            } else {
+                showToast(data.error || 'Ошибка регистрации', 'error');
             }
-        });
-    }
+        } catch (err) {
+            console.error(err);
+            showToast('Ошибка соединения с сервером', 'error');
+        }
+    });
+}
 
     // ★ ФУНКЦИЯ ВЫХОДА ИЗ АККАУНТА ★
     function logoutUser() {
