@@ -279,10 +279,20 @@
 
 /* Громкость */
 .player-volume {
-    margin-left: 10px;
+    margin-left: 20px;
     display: flex;
     align-items: center;
-    gap: 17px;
+    gap: 10px;
+}
+
+.volume-wrap {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.2s ease;
+}
+
+.player-volume:hover .volume-wrap {
+    width: 124px;
 }
 
 .volume-btn {
@@ -302,8 +312,8 @@
 }
 
 .volume-btn img {
-    width: 42px;
-    height: 42px;
+    width: 50px;
+    height: 48px;
 }
 
 .volume-slider {
@@ -315,7 +325,17 @@
     border-radius: 5px;
     cursor: pointer;
     padding: 15px 2px;
+    margin: 0px 5px;
     transition: all 0.2s ease;
+
+    opacity: 0;
+    visibility: hidden;
+}
+
+.player-volume:hover .volume-slider,
+.volume-slider:hover {
+    opacity: 1;
+    visibility: visible;
 }
 
 .volume-slider::-webkit-slider-runnable-track {
@@ -359,16 +379,16 @@
 
 /* Кнопка повтора */
 .repeat-mode-btn {
-    margin-left: 25px;
+    margin-left: 30px;
     opacity: 0.6;
     transition: all 0.15s ease;
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
 }
 
 #repeatModeBtn img {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
 }
 
 .repeat-mode-btn:hover {
@@ -378,6 +398,28 @@
 .repeat-mode-btn.active-one,
 .repeat-mode-btn.active-random {
     opacity: 1;
+}
+
+/* Кнопка лайка в плеере */
+.like-player-btn {
+    width: 45px;
+    height: 45px;
+    margin: 5px;
+    margin-left: 35px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.like-player-btn img {
+    width: 40px;
+    height: 40px;
+    transition: transform 0.15s ease;
+}
+
+.like-player-btn:hover img {
+    transform: scale(1.1);
 }
 
 button:focus,

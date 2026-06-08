@@ -86,6 +86,8 @@ const playerElements = {
     duration: document.getElementById('duration'),
     volumeSlider: document.getElementById('volumeSlider'),
     volumeBtn: document.getElementById('volumeBtn'),
+    likeBtn: document.getElementById('likePlayerBtn'),
+    likeImg: document.getElementById('likePlayerImg'),
     nowPlayingBar: document.getElementById('nowPlayingBar')
 };
 
@@ -368,6 +370,7 @@ function restorePlayerUI() {
             playerElements.progressBar.style.setProperty('--progress', `${progress * 100}%`);
         }
         window.playerHydrating = false;
+        if (window.currentSongId) updateLikeButtonState(window.currentSongId);
     });
 }
 
@@ -405,6 +408,7 @@ function playSongById(songId, autoPlay = true, fromFavorites = false) {
             playerElements.progressBar.value = 0;
             playerElements.progressBar.style.setProperty('--progress', '0%');
         }
+        updateLikeButtonState(songId);
     }
     
     // Обновляем UI один раз (анимация только для нового трека)
@@ -996,6 +1000,27 @@ function attachVocaloidLinkHandlers() {
     });
 }
 
+async function updateLikeButtonState(songId) {
+    const userId = localStorage.getItem('user_id');
+    const likeImg = playerElements.likeImg;
+    if (!userId || !likeImg || !songId) return;
+
+    try {
+        const response = await fetch(`/api/favorites?user_id=${userId}`);
+        const data = await response.json();
+        if (data.success) {
+            const isLiked = data.favorites.includes(songId);
+            likeImg.src = isLiked ? '/static/img/heart (1).png' : '/static/img/heart.png';
+            if (playerElements.likeBtn) {
+                if (isLiked) playerElements.likeBtn.classList.add('active');
+                else playerElements.likeBtn.classList.remove('active');
+            }
+        }
+    } catch (err) {
+        console.warn('Ошибка загрузки избранного для плеера:', err);
+    }
+}
+
 // ─── НЕДАВНО ПРОСЛУШАННЫЕ ────────────────────────────────────────────────────
 function addToRecentSongs(songId) {
     try {
@@ -1038,6 +1063,44 @@ if (!window.playerInitialized && document.getElementById('globalAudioPlayer')) {
 
     const repeatBtn = document.getElementById('repeatModeBtn');
     if (repeatBtn) repeatBtn.onclick = () => { addAnimation(repeatBtn, 'repeat-click-animation'); togglePlayMode(); };
+}
+
+if (playerElements.likeBtn) {
+    playerElements.likeBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const userId = localStorage.getItem('user_id');
+        const songId = window.currentSongId;
+        if (!userId) {
+            window.showToast('Войдите в аккаунт, чтобы добавлять в избранное', 'error');
+            return;
+        }
+        if (!songId) return;
+
+        // Добавляем анимацию
+        addAnimation(playerElements.likeBtn, 'like-click-animation');
+
+        // Используем существующую функцию toggleFavorite
+        toggleFavorite(userId, songId, (newLiked) => {
+            if (newLiked !== null) {
+                const likeImg = playerElements.likeImg;
+                if (likeImg) {
+                    likeImg.src = newLiked ? '/static/img/heart (1).png' : '/static/img/heart.png';
+                }
+                window.showToast(newLiked ? 'Добавлено в избранное' : 'Удалено из избранного', 'success');
+                // Дополнительно: обновляем кнопки на странице треков (если открыта)
+                if (typeof window.attachLikeHandlers === 'function') {
+                    // просто перезапускаем обработчики (или обновляем иконки)
+                    document.querySelectorAll('.like-song-btn').forEach(btn => {
+                        if (btn.dataset.id == songId) {
+                            const img = btn.querySelector('.like-icon');
+                            if (img) img.src = newLiked ? '/static/img/heart (1).png' : '/static/img/heart.png';
+                            btn.dataset.liked = String(newLiked);
+                        }
+                    });
+                }
+            }
+        });
+    });
 }
 
 // ─── УПРАВЛЕНИЕ С КЛАВИАТУРЫ ────────────────────────────────────────────────

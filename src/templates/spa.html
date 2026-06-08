@@ -164,10 +164,16 @@
             <button id="volumeBtn" class="volume-btn">
                 <img src="/static/img/volume-up.png" alt="Volume" onerror="this.src='/static/img/load.gif'">
             </button>
-            <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.7">
+            <div class="volume-wrap">
+                <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.7">
+            </div>
         </div>
         <button id="repeatModeBtn" class="player-btn repeat-mode-btn" title="Режим воспроизведения">
             <img id="repeatModeImg" src="/static/img/repeat.png" alt="Repeat|Повтор" style="opacity: 0.5;">
+        </button>
+
+        <button id="likePlayerBtn" class="player-btn like-player-btn" title="Добавить в избранное">
+            <img id="likePlayerImg" src="/static/img/heart.png" alt="Like">
         </button>
     </div>
 </div>
