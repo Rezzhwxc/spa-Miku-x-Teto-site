@@ -115,7 +115,16 @@ if (playerElements.artist) {
     playerElements.artist.addEventListener('click', (e) => {
         const url = playerElements.artist.dataset.vocaloidUrl;
         if (url && url !== '#') {
-            window.location.href = url; // открыть в новой вкладке
+            if (url.startsWith('/')) {
+                if (typeof window.navigateTo === 'function') {
+                    window.navigateTo(url);
+                } else {
+                    window.location.href = url; // fallback
+                }
+            } else {
+                // Внешняя ссылка → новая вкладка
+                window.open(url, '_blank');
+            }
         }
     });
 }
@@ -630,15 +639,12 @@ function togglePlayMode() {
     if (currentSongId) {
         const currentSong = songsList.find(s => s.id == currentSongId);
         if (currentSong && playerElements.title) {
-            if (playerElements.title) playerElements.title.textContent = currentSong.name || '—';
             if (playerElements.artist) {
                 playerElements.artist.textContent = currentSong.vocaloid_name || 'Vocaloid';
-                playerElements.artist.dataset.vocaloidUrl = currentSong.vocaloid_url || '#';   // ★ добавлено
+                playerElements.artist.dataset.vocaloidUrl = currentSong.vocaloid_url || '#';
             }
         }
     }
-    if (playerElements.title) playerElements.title.textContent = currentSong.name || '—';
-    checkAndRunMarquee(playerElements.title);
     syncGlobals();
 }
 
@@ -972,7 +978,17 @@ function attachVocaloidLinkHandlers() {
         el.onclick = (e) => {
             e.stopPropagation();
             const url = el.dataset.url;
-            if (url && url !== '#') window.location.href = url;
+            if (url && url !== '#') {
+                if (url.startsWith('/')) {
+                    if (typeof window.navigateTo === 'function') {
+                        window.navigateTo(url);
+                    } else {
+                        window.location.href = url;
+                    }
+                } else {
+                    window.open(url, '_blank');
+                }
+            }
         };
         Object.assign(el.style, { cursor: 'pointer', transition: 'color 0.2s' });
         el.onmouseenter = () => el.style.color = 'rgba(189, 189, 189, 0.79)';
@@ -1024,13 +1040,77 @@ if (!window.playerInitialized && document.getElementById('globalAudioPlayer')) {
     if (repeatBtn) repeatBtn.onclick = () => { addAnimation(repeatBtn, 'repeat-click-animation'); togglePlayMode(); };
 }
 
+// ─── УПРАВЛЕНИЕ С КЛАВИАТУРЫ ────────────────────────────────────────────────
 document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+    const activeTag = document.activeElement?.tagName;
+    if (['INPUT', 'TEXTAREA'].includes(activeTag)) return;
+
+    // Пробел: пауза/воспроизведение
+    if (e.code === 'Space') {
         e.preventDefault();
         if (currentAudio?.src) {
             if (playerElements.playPauseBtn) addAnimation(playerElements.playPauseBtn, 'play-click-animation');
             togglePlayPause();
         }
+        return;
+    }
+
+    // Если нет активного трека – остальные клавиши не работают
+    if (!currentAudio || !currentAudio.src) return;
+
+    switch (e.key) {
+        case 'ArrowLeft':
+            e.preventDefault();
+            currentAudio.currentTime = Math.max(0, currentAudio.currentTime - 5);
+            if (typeof window.showToast === 'function') {
+                const minutes = Math.floor(currentAudio.currentTime / 60);
+                const seconds = Math.floor(currentAudio.currentTime % 60).toString().padStart(2, '0');
+            }
+            break;
+
+        case 'ArrowRight':
+            e.preventDefault();
+            currentAudio.currentTime = Math.min(currentAudio.duration || 0, currentAudio.currentTime + 5);
+            if (typeof window.showToast === 'function') {
+                const minutes = Math.floor(currentAudio.currentTime / 60);
+                const seconds = Math.floor(currentAudio.currentTime % 60).toString().padStart(2, '0');
+            }
+            break;
+
+        case 'ArrowUp':
+            e.preventDefault();
+            {
+                let newVolume = (currentAudio.volume + 0.05).toFixed(2);
+                if (newVolume > 1) newVolume = 1;
+                currentAudio.volume = parseFloat(newVolume);
+                if (playerElements.volumeSlider) {
+                    playerElements.volumeSlider.value = currentAudio.volume;
+                    playerElements.volumeSlider.style.setProperty('--volume', `${currentAudio.volume * 100}%`);
+                }
+                updateVolumeIcon();
+                if (typeof window.showToast === 'function') {
+                }
+            }
+            break;
+
+        case 'ArrowDown':
+            e.preventDefault();
+            {
+                let newVolume = (currentAudio.volume - 0.05).toFixed(2);
+                if (newVolume < 0) newVolume = 0;
+                currentAudio.volume = parseFloat(newVolume);
+                if (playerElements.volumeSlider) {
+                    playerElements.volumeSlider.value = currentAudio.volume;
+                    playerElements.volumeSlider.style.setProperty('--volume', `${currentAudio.volume * 100}%`);
+                }
+                updateVolumeIcon();
+                if (typeof window.showToast === 'function') {
+                }
+            }
+            break;
+
+        default:
+            break;
     }
 });
 
@@ -1136,6 +1216,7 @@ currentAudio.addEventListener('pause', () => {
     syncGlobals();
     notifyPlayStateChange();
 });
+
 window.attachLikeHandlers = attachLikeHandlers;
 window.attachVocaloidLinkHandlers = attachVocaloidLinkHandlers;
 window.togglePlayPause = togglePlayPause;

@@ -266,7 +266,7 @@ overflow-y: hidden;}
     color: #e6e3e3a4;
     font-size: 20px;
     background: none;
-    margin: 13px;
+    margin: 8px; margin-top: 13px;
     transition: 0.2s ease;
     padding: 16px;
     border: 1px solid rgb(37, 37, 37);
