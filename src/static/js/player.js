@@ -1274,6 +1274,30 @@ if (volumeSlider) {
     });
 }
 
+// ─── ЗАДЕРЖКА ДЛЯ КНОПКИ ЛАЙКА ПРИ НАВЕДЕНИИ НА ГРОМКОСТЬ ─────────────────
+(function() {
+    const volumeBlock = document.querySelector('.player-volume');
+    const likeBtn = document.getElementById('likePlayerBtn');
+    if (!volumeBlock || !likeBtn) return;
+
+    let showTimeout = null;
+
+    function hideLikeButton() {
+        if (showTimeout) clearTimeout(showTimeout);
+        likeBtn.style.display = 'none';          // мгновенно скрываем
+    }
+
+    function showLikeButton() {
+        if (showTimeout) clearTimeout(showTimeout);
+        showTimeout = setTimeout(() => {
+            likeBtn.style.display = '';           // возвращаем через 0.2 сек
+        }, 200);
+    }
+
+    volumeBlock.addEventListener('mouseenter', hideLikeButton);
+    volumeBlock.addEventListener('mouseleave', showLikeButton);
+})();
+
 // Экспорт обработчиков для index.js
 window.attachSongHandlers = attachSongHandlers;
 window.attachLikeHandlers = attachLikeHandlers;

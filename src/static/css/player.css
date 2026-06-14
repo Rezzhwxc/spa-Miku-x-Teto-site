@@ -409,7 +409,6 @@
     background: none;
     border: none;
     cursor: pointer;
-    transition: all 0.2s ease;
 }
 
 .like-player-btn img {
@@ -419,7 +418,7 @@
 }
 
 .like-player-btn:hover img {
-    transform: scale(1.1);
+    transform: scale(1.08);
 }
 
 button:focus,
