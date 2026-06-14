@@ -548,4 +548,9 @@ function attachRecentCardHandlers(container) {
     document.addEventListener('playStateChanged', refreshProfilePlayIcons);
 }
 
+window.addEventListener('favoritesUpdated', async () => {
+    await loadFavorites();
+    refreshProfilePlayIcons();
+});
+
 window.runProfilePage = runProfilePage;

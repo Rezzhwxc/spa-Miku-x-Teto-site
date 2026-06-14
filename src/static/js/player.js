@@ -357,6 +357,7 @@ function restorePlayerUI() {
 
     window.playerHydrating = true;
     updatePlayerUI(song, { restoreOnly: true });
+    updateLikeButtonState(window.currentSongId);
     highlightActiveSong(window.currentSongId);
     updateCirculIcon(window.currentSongId, !currentAudio?.paused);
 
@@ -370,7 +371,6 @@ function restorePlayerUI() {
             playerElements.progressBar.style.setProperty('--progress', `${progress * 100}%`);
         }
         window.playerHydrating = false;
-        if (window.currentSongId) updateLikeButtonState(window.currentSongId);
     });
 }
 
@@ -408,11 +408,11 @@ function playSongById(songId, autoPlay = true, fromFavorites = false) {
             playerElements.progressBar.value = 0;
             playerElements.progressBar.style.setProperty('--progress', '0%');
         }
-        updateLikeButtonState(songId);
     }
     
     // Обновляем UI один раз (анимация только для нового трека)
     updatePlayerUI(song, { silent: !isNewSong });
+    updateLikeButtonState(songId);
     
     if (autoPlay) {
         const attemptPlay = () => {
@@ -887,6 +887,23 @@ function attachSongBoxHandlers() {
 
 // ─── ИЗБРАННОЕ (ЛАЙКИ) ──────────────────────────────────────────────────────
 
+function syncFavoriteUI(songId, liked) {
+    const songIdStr = String(songId);
+
+    document.querySelectorAll(`.like-song-btn[data-id="${songIdStr}"]`).forEach(btn => {
+        btn.dataset.liked = String(liked);
+        const img = btn.querySelector('.like-icon');
+        if (img) img.src = liked ? '/static/img/heart (1).png' : '/static/img/heart.png';
+    });
+
+    if (playerElements.likeBtn && String(currentSongId) === songIdStr) {
+        playerElements.likeBtn.classList.toggle('active', liked);
+        if (playerElements.likeImg) {
+            playerElements.likeImg.src = liked ? '/static/img/heart (1).png' : '/static/img/heart.png';
+        }
+    }
+}
+
 function getUserFavorites(userId, callback) {
     fetch(`/api/favorites?user_id=${userId}`)
         .then(res => res.json())
@@ -964,12 +981,18 @@ function attachLikeHandlers() {
             addAnimation(btn, 'like-click-animation');
 
             toggleFavorite(userId, songId, (newLiked) => {
-                if (newLiked !== null) {
-                    btn.dataset.liked = String(newLiked);
-                    const img = btn.querySelector('.like-icon');
-                    if (img) img.src = newLiked ? '/static/img/heart (1).png' : '/static/img/heart.png';
-                    window.showToast(newLiked ? 'Добавлено в избранное' : 'Удалено из избранного', 'success');
-                }
+                if (newLiked === null) return;
+
+                syncFavoriteUI(songId, newLiked);
+
+                window.showToast(
+                    newLiked ? 'Добавлено в избранное' : 'Удалено из избранного',
+                    'success'
+                );
+
+                window.dispatchEvent(new CustomEvent('favoritesUpdated', {
+                    detail: { userId, songId, liked: newLiked }
+                }));
             });
         };
         btn._likeHandler = handler;
@@ -1021,6 +1044,40 @@ async function updateLikeButtonState(songId) {
     }
 }
 
+async function handlePlayerLikeToggle() {
+    const userId = localStorage.getItem('user_id');
+    const songId = currentSongId;
+    if (!userId || !songId) return;
+
+    toggleFavorite(userId, songId, (newLiked) => {
+        if (newLiked === null) return;
+
+        // Обновляем все кнопки лайков (включая плеер) через единую функцию
+        syncFavoriteUI(songId, newLiked);
+
+        if (typeof window.showToast === 'function') {
+            window.showToast(
+                newLiked ? 'Добавлено в избранное' : 'Удалено из избранного',
+                'success'
+            );
+        }
+
+        window.dispatchEvent(new CustomEvent('favoritesUpdated', {
+            detail: { userId, songId, liked: newLiked }
+        }));
+
+        if (typeof window.refreshRecentFavorites === 'function') {
+            window.refreshRecentFavorites();
+        }
+    });
+}
+
+window.addEventListener('favoritesUpdated', (e) => {
+    const { songId, liked } = e.detail || {};
+    if (songId == null) return;
+    syncFavoriteUI(songId, liked);
+});
+
 // ─── НЕДАВНО ПРОСЛУШАННЫЕ ────────────────────────────────────────────────────
 function addToRecentSongs(songId) {
     try {
@@ -1060,47 +1117,15 @@ if (!window.playerInitialized && document.getElementById('globalAudioPlayer')) {
     if (playerElements.volumeBtn) playerElements.volumeBtn.onclick = () => { addAnimation(playerElements.volumeBtn, 'volume-click-animation'); toggleMute(); };
     if (playerElements.progressBar) playerElements.progressBar.oninput = seekTo;
     if (playerElements.volumeSlider) playerElements.volumeSlider.oninput = changeVolume;
+    if (playerElements.likeBtn) {
+    playerElements.likeBtn.onclick = () => {
+        addAnimation(playerElements.likeBtn, 'like-click-animation');
+        handlePlayerLikeToggle();
+    };
+}
 
     const repeatBtn = document.getElementById('repeatModeBtn');
     if (repeatBtn) repeatBtn.onclick = () => { addAnimation(repeatBtn, 'repeat-click-animation'); togglePlayMode(); };
-}
-
-if (playerElements.likeBtn) {
-    playerElements.likeBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const userId = localStorage.getItem('user_id');
-        const songId = window.currentSongId;
-        if (!userId) {
-            window.showToast('Войдите в аккаунт, чтобы добавлять в избранное', 'error');
-            return;
-        }
-        if (!songId) return;
-
-        // Добавляем анимацию
-        addAnimation(playerElements.likeBtn, 'like-click-animation');
-
-        // Используем существующую функцию toggleFavorite
-        toggleFavorite(userId, songId, (newLiked) => {
-            if (newLiked !== null) {
-                const likeImg = playerElements.likeImg;
-                if (likeImg) {
-                    likeImg.src = newLiked ? '/static/img/heart (1).png' : '/static/img/heart.png';
-                }
-                window.showToast(newLiked ? 'Добавлено в избранное' : 'Удалено из избранного', 'success');
-                // Дополнительно: обновляем кнопки на странице треков (если открыта)
-                if (typeof window.attachLikeHandlers === 'function') {
-                    // просто перезапускаем обработчики (или обновляем иконки)
-                    document.querySelectorAll('.like-song-btn').forEach(btn => {
-                        if (btn.dataset.id == songId) {
-                            const img = btn.querySelector('.like-icon');
-                            if (img) img.src = newLiked ? '/static/img/heart (1).png' : '/static/img/heart.png';
-                            btn.dataset.liked = String(newLiked);
-                        }
-                    });
-                }
-            }
-        });
-    });
 }
 
 // ─── УПРАВЛЕНИЕ С КЛАВИАТУРЫ ────────────────────────────────────────────────
