@@ -37,6 +37,18 @@
     }
 }
 
+@keyframes nickname {
+    0%{
+        color: #ffffffcc;
+    }
+    50%{
+        color: #a7a7a7;
+    }
+    100%{
+        color: #ffffffcc;
+    }
+}
+
 /* SCROLLBOX */
 .scroll-box{
     overflow-y: scroll;
@@ -396,6 +408,7 @@
 }
 
 #podrob1, #podrob2, #podrob3{
+    user-select: none;
     justify-self: center;
     width: fit-content;
     padding: 5px;
@@ -409,6 +422,28 @@
 #podrob1:hover, #podrob2:hover, #podrob3:hover{
     scale: 1.03;
     color: #e5e5e5;
+}
+#podrob1:active, #podrob2:active, #podrob3:active{
+    scale: 0.97;
+    color: #c9c9c9;
+}
+
+#podrob-box1{
+    justify-self: center;
+    background: rgb(40, 40, 40);
+    border-radius: 20px;
+    width: 60%;
+    height: fit-content;
+    margin: 10px 20px;
+    padding: 20px;
+    z-index: 1111;
+    font-family: 'unbound';
+    font-size: 16px; text-align: center; letter-spacing: 2px;
+    color: #ffffffcc;
+}
+.nickkk{
+    text-shadow: 5px 5px black;
+    animation: nickname 3s ease infinite;
 }
 
 /* footer */

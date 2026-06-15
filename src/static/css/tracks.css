@@ -31,6 +31,8 @@
     transition: all 0.2s ease;
     border-radius: 50%;
     cursor: pointer;
+    width: 320px;
+    height: 320px;
 }
 .circul-cover:active {
     transform: scale(0.95);

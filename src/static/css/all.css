@@ -668,7 +668,7 @@ input[type="search"]::-webkit-search-decoration {
 .search-play img {
     width: 20px;
     height: 20px;
-    margin-left: 2px;
+    margin-left: 4px;
 }
 
 #search-result::-webkit-scrollbar {

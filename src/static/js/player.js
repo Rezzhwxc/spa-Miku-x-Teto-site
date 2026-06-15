@@ -657,13 +657,21 @@ async function loadSongs() {
         const res = await fetch('/api/songs');
         const data = await res.json();
         if (data.success) {
-            songsList = data.songs;
+            // Разворачиваем весь массив треков, чтобы новые оказались в начале
+            songsList = data.songs.reverse();
             originalSongsList = [...songsList];
+            
+            // Теперь первые 3 элемента — это 3 самых последних добавленных трека
             displayTopSongs(songsList.slice(0, 3));
+            
+            // Остальные добавленные ранее треки идут ниже (тоже от новых к старым)
             displayOtherSongs(songsList.slice(3));
+            
             syncGlobals();
         }
-    } catch (error) { console.error('Ошибка загрузки треков:', error); }
+    } catch (error) {
+        console.error('Ошибка загрузки треков:', error);
+    }
 }
 
 // ─── ПОИСК ТРЕКОВ ────────────────────────────────────────────────────────────
