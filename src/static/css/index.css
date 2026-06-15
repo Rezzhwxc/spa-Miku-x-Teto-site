@@ -336,8 +336,9 @@
 /* content 3 - about us */
 
 #content3{
+    position: relative;
     height: fit-content;
-    margin-top: 120px;
+    margin-top: 110px;
 }
 
 .word-container2 {
@@ -428,22 +429,67 @@
     color: #c9c9c9;
 }
 
-#podrob-box1{
-    justify-self: center;
-    background: rgb(40, 40, 40);
+#modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* НАЧАЛЬНОЕ СОСТОЯНИЕ (Скрыто) */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#modal-overlay.active {
+    opacity: 1;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.podrob-info-box {
+    position: relative;
+    background-color: rgba(30, 30, 30, 0.98) !important;
     border-radius: 20px;
     width: 60%;
     height: fit-content;
-    margin: 10px 20px;
-    padding: 20px;
-    z-index: 1111;
+    margin: 0 auto;
+    padding: 25px;
+    border: 2px solid rgb(37, 37, 37);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     font-family: 'unbound';
-    font-size: 16px; text-align: center; letter-spacing: 2px;
+    font-size: 16px; 
+    text-align: center; 
+    letter-spacing: 2px;
     color: #ffffffcc;
+
+    /* НАЧАЛЬНОЕ СОСТОЯНИЕ КАРТОЧКИ (Слегка уменьшена) */
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
+
+#modal-overlay.active .podrob-info-box:not(.hide) {
+    transform: scale(1);
+}
+
+.hide {
+    display: none !important;
+}
+
 .nickkk{
+    user-select: none;
+    margin-top: 15px;
     text-shadow: 5px 5px black;
     animation: nickname 3s ease infinite;
+}
+
+.podrob-info-box p{
+    margin: 25px 10px;
+    font-size: 18px;
 }
 
 /* footer */

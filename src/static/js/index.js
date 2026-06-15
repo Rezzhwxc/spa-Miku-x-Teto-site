@@ -170,6 +170,75 @@ function initCirculindex() {
     // Обновляем иконки (актуально при возврате на страницу с играющим треком)
     updateAllCirculPlayIcons();
 
+    // === КОД ДЛЯ МОДАЛЬНОГО ОВЕРЛЕЯ ПОДРОБНОСТЕЙ О РАЗРАБОТЧИКАХ ===
+    const btn1 = document.getElementById('podrob1');
+    const btn2 = document.getElementById('podrob2');
+    const btn3 = document.getElementById('podrob3');
+
+    const overlay = document.getElementById('modal-overlay');
+    const box1 = document.getElementById('podrob-box1');
+    const box2 = document.getElementById('podrob-box2');
+    const box3 = document.getElementById('podrob-box3');
+
+    const allBoxes = [box1, box2, box3];
+
+    // Функция плавного закрытия
+    function closeModal() {
+        if (!overlay || overlay.classList.contains('hide')) return;
+
+        // 1. Убираем класс active, запускается CSS-анимация (растворение фона и уменьшение карточки)
+        overlay.classList.remove('active');
+        
+        // 2. Ждем 300мс (пока идет transition) и только потом физически скрываем элементы через .hide
+        setTimeout(() => {
+            overlay.classList.add('hide');
+            allBoxes.forEach(box => {
+                if (box) box.classList.add('hide');
+            });
+        }, 300);
+    }
+
+    // Функция плавного открытия
+    function openModal(targetBox) {
+        if (!overlay || !targetBox) return;
+
+        // На всякий случай скрываем остальные карточки в дефолтное состояние
+        allBoxes.forEach(box => {
+            if (box && box !== targetBox) box.classList.add('hide');
+        });
+
+        // 1. Убираем дисплей хайд, чтобы элементы появились в DOM
+        overlay.classList.remove('hide');
+        targetBox.classList.remove('hide');
+        
+        // 2. Микро-пауза (10мс), чтобы браузер успел применить transition к добавляемому классу .active
+        setTimeout(() => {
+            overlay.classList.add('active');
+        }, 10);
+    }
+
+    // Назначаем клики на текстовые триггеры
+    if (btn1 && box1) btn1.onclick = () => openModal(box1);
+    if (btn2 && box2) btn2.onclick = () => openModal(box2);
+    if (btn3 && box3) btn3.onclick = () => openModal(box3);
+
+    // Закрытие при клике на оверлей (в любое место мимо самой карточки)
+    if (overlay) {
+        overlay.onclick = (event) => {
+            if (event.target === overlay) {
+                closeModal();
+            }
+        };
+    }
+
+    // Закрытие при нажатии на кнопку Escape (Esc)
+    window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' || event.keyCode === 27) {
+            closeModal();
+        }
+    });
+    // ======================================================================
+
     // Показываем список: если фильтр активен — показываем фильтрованный, иначе — все
     if (window.currentCharacterFilter) {
         const filtered = getSongs().filter(s => String(s.vocaloid_id) === String(window.currentCharacterFilter));
@@ -452,6 +521,7 @@ if (document.readyState === 'loading') {
 } else {
     updateProfileAvatar();
 }
+
 
 // ==================== ЭКСПОРТ ====================
 
