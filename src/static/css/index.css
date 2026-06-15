@@ -453,7 +453,7 @@
 
 .podrob-info-box {
     position: relative;
-    background-color: rgba(30, 30, 30, 0.98) !important;
+    background-color: rgba(30, 30, 30, 0.9) !important;
     border-radius: 20px;
     width: 60%;
     height: fit-content;
@@ -484,12 +484,15 @@
     user-select: none;
     margin-top: 15px;
     text-shadow: 5px 5px black;
+    font-size: 35px;
     animation: nickname 3s ease infinite;
 }
 
 .podrob-info-box p{
-    margin: 25px 10px;
+    margin: 25px 20px;
     font-size: 18px;
+    line-height: 1.6;
+    text-align: justify;
 }
 
 /* footer */
