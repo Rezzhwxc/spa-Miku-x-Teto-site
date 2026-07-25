@@ -1,10 +1,13 @@
 from flask import Flask, render_template, send_file, jsonify, request, Response
+from dotenv import load_dotenv
 import psycopg2
 import os
 import traceback
 
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
+
+load_dotenv()  # Reads variables from .env
 
 app = Flask(__name__,
             static_folder='static',
@@ -19,11 +22,11 @@ PHOTO_FOLDER  = os.path.join(BASE_DIR, 'photo')
 
 def get_db_connection():
     return psycopg2.connect(
-        host="localhost",
-        database="popular",
-        user="postgres",
-        password="Yarik_Top1",
-        port="5432"
+        host=os.getenv("DB_HOST", "localhost"),
+        database=os.getenv("DB_NAME", "popular"),
+        user=os.getenv("DB_USER", "postgres"),
+        password=os.getenv("DB_PASSWORD"),
+        port=os.getenv("DB_PORT", "5432")
     )
 
 # ─── SPA shell ────────────────────────────────────────────────────────────────
