@@ -25,6 +25,7 @@ let audioContext = null;
 let mediaSourceNode = null;
 let gainNode = null;
 let compressorNode = null;
+let masterGainNode = null;
 
 let currentAudio = null;
 let currentSongId = null;
@@ -51,19 +52,25 @@ function initWebAudio(audioEl) {
 
     if (!mediaSourceNode) {
         mediaSourceNode = audioContext.createMediaElementSource(audioEl);
+
         gainNode = audioContext.createGain();
-        gainNode.gain.value = 0.85;
+        gainNode.gain.value = 1.0;
 
         compressorNode = audioContext.createDynamicsCompressor();
-        compressorNode.threshold.value = -24;
-        compressorNode.knee.value = 10;
-        compressorNode.ratio.value = 6;
+        compressorNode.threshold.value = -18; 
+        compressorNode.knee.value = 12;
+        compressorNode.ratio.value = 4;
         compressorNode.attack.value = 0.003;
         compressorNode.release.value = 0.25;
 
+        masterGainNode = audioContext.createGain();
+        const initialSliderVal = playerElements.volumeSlider ? parseFloat(playerElements.volumeSlider.value) : 0.7;
+        masterGainNode.gain.value = Math.pow(initialSliderVal, 2);
+
         mediaSourceNode.connect(gainNode);
         gainNode.connect(compressorNode);
-        compressorNode.connect(audioContext.destination);
+        compressorNode.connect(masterGainNode);
+        masterGainNode.connect(audioContext.destination);
     }
 }
 
@@ -549,9 +556,16 @@ function seekTo() {
 }
 
 function changeVolume() {
-    if (currentAudio) {
-        const vol = parseFloat(playerElements.volumeSlider.value);
-        currentAudio.volume = vol;
+    const vol = parseFloat(playerElements.volumeSlider.value);
+    const mappedVolume = Math.pow(vol, 2);
+
+    if (masterGainNode) {
+        masterGainNode.gain.value = mappedVolume;
+    } else if (currentAudio) {
+        currentAudio.volume = mappedVolume; // Фолбэк, если Web Audio не завелось
+    }
+
+    if (playerElements.volumeSlider) {
         playerElements.volumeSlider.style.setProperty('--volume', `${vol * 100}%`);
     }
     updateVolumeIcon();
@@ -560,27 +574,25 @@ function changeVolume() {
 
 let lastVolume = 0.7;
 function toggleMute() {
-    if (currentAudio) {
-        if (currentAudio.volume > 0) {
-            lastVolume = currentAudio.volume;
-            currentAudio.volume = 0;
-            playerElements.volumeSlider.value = 0;
-            playerElements.volumeSlider.style.setProperty('--volume', '0%');
-        } else {
-            currentAudio.volume = lastVolume;
-            playerElements.volumeSlider.value = lastVolume;
-            playerElements.volumeSlider.style.setProperty('--volume', `${lastVolume * 100}%`);
-        }
-        updateVolumeIcon();
+    const currentSliderVal = parseFloat(playerElements.volumeSlider.value);
+    
+    if (currentSliderVal > 0) {
+        lastVolume = currentSliderVal;
+        playerElements.volumeSlider.value = 0;
+    } else {
+        playerElements.volumeSlider.value = lastVolume;
     }
-    syncGlobals();
+    
+    changeVolume(); // Вызываем единую функцию изменения
 }
 
 function updateVolumeIcon() {
-    const vol = currentAudio?.volume || 0;
+    const vol = playerElements.volumeSlider ? parseFloat(playerElements.volumeSlider.value) : 0;
     const img = playerElements.volumeBtn?.querySelector('img');
     if (img) img.src = vol === 0 ? '/static/img/volume-mute.png' : '/static/img/volume-up.png';
 }
+
+// 
 
 function highlightActiveSong(songId) {
     document.querySelectorAll('.circul, .song').forEach(el => el.classList.remove('playing'));
@@ -1214,12 +1226,9 @@ document.addEventListener('keydown', (e) => {
 window.recentPlayedIds = window.recentPlayedIds || [];
 
 function updateRecentPlayed(songId) {
-    // Удаляем старый ID, если он уже был
     const index = window.recentPlayedIds.indexOf(songId);
     if (index !== -1) window.recentPlayedIds.splice(index, 1);
-    // Добавляем в начало
     window.recentPlayedIds.unshift(songId);
-    // Храним только последние 3
     if (window.recentPlayedIds.length > 3) window.recentPlayedIds.pop();
     console.log('[RECENT] now:', window.recentPlayedIds);
 }
@@ -1227,11 +1236,9 @@ function updateRecentPlayed(songId) {
 // Возвращает следующий трек, не входящий в recentPlayedIds (если возможно)
 function getNextSongNoRepeat(availableSongs, currentId) {
     if (!availableSongs.length) return null;
-    // Находим индекс текущего трека
     let currentIndex = availableSongs.findIndex(s => s.id == currentId);
     if (currentIndex === -1) currentIndex = 0;
 
-    // Пробуем последовательно, начиная со следующего, с зацикливанием
     for (let i = 1; i <= availableSongs.length; i++) {
         const nextIndex = (currentIndex + i) % availableSongs.length;
         const candidate = availableSongs[nextIndex];
@@ -1266,22 +1273,7 @@ function getPrevSongNoRepeat(availableSongs, currentId) {
 
 const volumeIMG = document.getElementById('volumeBtn');
 const volumeSlider = document.getElementById('volumeSlider');
-if (volumeSlider) {
-    volumeSlider.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        let currentVolume = parseFloat(volumeSlider.value);
-        const delta = e.deltaY > 0 ? -0.05 : 0.05;
-        let newVolume = currentVolume + delta;
-        newVolume = Math.max(0, Math.min(1, newVolume));
-        newVolume = Math.round(newVolume * 100) / 100;
-        volumeSlider.value = newVolume;
-        if (currentAudio) {
-            currentAudio.volume = newVolume;
-            volumeSlider.style.setProperty('--volume', `${newVolume * 100}%`);
-        }
-        updateVolumeIcon();
-    });
-}
+
 // изменение звука при наведении на иконку звука
 function handleVolumeWheel(e) {
     e.preventDefault();
@@ -1291,12 +1283,13 @@ function handleVolumeWheel(e) {
     let newVolume = currentVolume + delta;
     newVolume = Math.max(0, Math.min(1, newVolume));
     newVolume = Math.round(newVolume * 100) / 100;
+    
     volumeSlider.value = newVolume;
-    if (currentAudio) {
-        currentAudio.volume = newVolume;
-        volumeSlider.style.setProperty('--volume', `${newVolume * 100}%`);
-    }
-    updateVolumeIcon();
+    changeVolume();
+}
+
+if (volumeSlider) {
+    volumeSlider.addEventListener('wheel', handleVolumeWheel, { passive: false });
 }
 if (volumeIMG) {
     volumeIMG.addEventListener('wheel', handleVolumeWheel, { passive: false });
@@ -1340,7 +1333,7 @@ function notifyPlayStateChange() {
     document.dispatchEvent(event);
 }
 
-// В обработчики play и pause добавь:
+// обработчики play и pause
 currentAudio.addEventListener('play', () => {
     updateCirculIcon(currentSongId, true);
     if (playerElements.playPauseImg) playerElements.playPauseImg.src = '/static/img/pause-button.png';
