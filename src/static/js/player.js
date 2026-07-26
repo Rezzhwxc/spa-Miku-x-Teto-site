@@ -1282,6 +1282,25 @@ if (volumeSlider) {
         updateVolumeIcon();
     });
 }
+// изменение звука при наведении на иконку звука
+function handleVolumeWheel(e) {
+    e.preventDefault();
+    if (!volumeSlider) return;
+    let currentVolume = parseFloat(volumeSlider.value);
+    const delta = e.deltaY > 0 ? -0.05 : 0.05;
+    let newVolume = currentVolume + delta;
+    newVolume = Math.max(0, Math.min(1, newVolume));
+    newVolume = Math.round(newVolume * 100) / 100;
+    volumeSlider.value = newVolume;
+    if (currentAudio) {
+        currentAudio.volume = newVolume;
+        volumeSlider.style.setProperty('--volume', `${newVolume * 100}%`);
+    }
+    updateVolumeIcon();
+}
+if (volumeIMG) {
+    volumeIMG.addEventListener('wheel', handleVolumeWheel, { passive: false });
+}
 
 // ─── ЗАДЕРЖКА ДЛЯ КНОПКИ ЛАЙКА ПРИ НАВЕДЕНИИ НА ГРОМКОСТЬ ─────────────────
 (function() {
