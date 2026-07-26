@@ -44,108 +44,115 @@ if (!isLoggedIn || !userId) {
     updateNicknameDisplay();
 
     // ========== 2. РЕДАКТИРОВАНИЕ НИКА ==========
-    const editBtn = document.getElementById('edit-nickname');
-    if (editBtn && currentUserId) {
-        // Удаляем старый обработчик, если есть, чтобы не дублировать
-        if (editBtn._nickEditHandler) {
-            editBtn.removeEventListener('click', editBtn._nickEditHandler);
+const editBtn = document.getElementById('edit-nickname');
+if (editBtn && currentUserId) {
+    if (editBtn._nickEditHandler) {
+        editBtn.removeEventListener('click', editBtn._nickEditHandler);
+    }
+
+    const editHandler = () => {
+        const nicknameEl = document.getElementById('nickname');
+        if (!nicknameEl) return;
+        if (document.getElementById('nickname-input')) return;
+
+        const current = getDisplayName();
+        const input = document.createElement('input');
+        input.id = 'nickname-input';
+        input.type = 'text';
+        input.value = current;
+        input.maxLength = 10;
+        input.placeholder = 'Введите новое имя...';
+
+        nicknameEl.replaceWith(input);
+        input.focus();
+        input.select();
+
+        function restoreNickname(newVal) {
+            document.removeEventListener('click', outsideClickHandler);
+            const p = document.createElement('p');
+            p.id = 'nickname';
+            p.textContent = newVal || getDisplayName();
+            input.replaceWith(p);
         }
 
-        const editHandler = () => {
-            // Каждый раз заново получаем актуальный элемент
-            const nicknameEl = document.getElementById('nickname');
-            if (!nicknameEl) return;
-            if (document.getElementById('nickname-input')) return;
+        let isSaving = false;
 
-            const current = getDisplayName();
-            const input = document.createElement('input');
-            input.id = 'nickname-input';
-            input.type = 'text';
-            input.value = current;
-            input.maxLength = 10;
-            input.placeholder = 'Введите новое имя...';
+        async function save() {
+            if (isSaving) return;
+            isSaving = true;
 
-            nicknameEl.replaceWith(input);
-            input.focus();
-            input.select();
-
-            function restoreNickname(newVal) {
-                const p = document.createElement('p');
-                p.id = 'nickname';
-                p.textContent = newVal || getDisplayName();
-                input.replaceWith(p);
+            const newName = input.value.trim();
+            if (!newName) {
+                window.showToast('Имя не может быть пустым', 'error');
+                restoreNickname(current);
+                isSaving = false;
+                return;
+            }
+            if (newName.length > 10) {
+                window.showToast('Имя не может быть длиннее 10 символов', 'error');
+                restoreNickname(current);
+                isSaving = false;
+                return;
+            }
+            const invalidChars = /[<>\"'&%$#@!*()\\/;=`]/g;
+            if (invalidChars.test(newName)) {
+                window.showToast('Имя содержит недопустимые символы', 'error');
+                restoreNickname(current);
+                isSaving = false;
+                return;
+            }
+            if (newName === current) {
+                restoreNickname(current);
+                isSaving = false;
+                return;
             }
 
-            let isSaving = false; // флаг для предотвращения двойного сохранения
-
-async function save() {
-    if (isSaving) return;
-    isSaving = true;
-
-    const newName = input.value.trim();
-    if (!newName) {
-        window.showToast('Имя не может быть пустым', 'error');
-        restoreNickname(current);
-        isSaving = false;
-        return;
-    }
-    if (newName.length > 10) {
-        window.showToast('Имя не может быть длиннее 10 символов', 'error');
-        restoreNickname(current);
-        isSaving = false;
-        return;
-    }
-    const invalidChars = /[<>\"'&%$#@!*()\\/;=`]/g;
-    if (invalidChars.test(newName)) {
-        window.showToast('Имя содержит недопустимые символы', 'error');
-        restoreNickname(current);
-        isSaving = false;
-        return;
-    }
-    if (newName === current) {
-        restoreNickname(current);
-        isSaving = false;
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/update_profile', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: currentUserId, name: newName })
-        });
-        const data = await response.json();
-        if (data.success) {
-            localStorage.setItem('user_name', newName);
-            currentName = newName;
-            window.showToast('Имя успешно изменено!', 'success');
-            restoreNickname(newName);
-            const regBtn = document.getElementById('regjs');
-            if (regBtn && localStorage.getItem('is_logged_in') === 'true') {
-                const email = localStorage.getItem('user_email') || '';
-                regBtn.innerHTML = `<img class="reg" src="/static/img/add-user (1).png">${newName || email.split('@')[0]}`;
+            try {
+                const response = await fetch('/api/update_profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: currentUserId, name: newName })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    localStorage.setItem('user_name', newName);
+                    currentName = newName;
+                    window.showToast('Имя успешно изменено!', 'success');
+                    restoreNickname(newName);
+                    const regBtn = document.getElementById('regjs');
+                    if (regBtn && localStorage.getItem('is_logged_in') === 'true') {
+                        const email = localStorage.getItem('user_email') || '';
+                        regBtn.innerHTML = `<img class="reg" src="/static/img/add-user (1).png">${newName || email.split('@')[0]}`;
+                    }
+                } else {
+                    window.showToast(data.error || 'Ошибка обновления', 'error');
+                    restoreNickname(current);
+                }
+            } catch (err) {
+                console.error(err);
+                window.showToast('Ошибка соединения с сервером', 'error');
+                restoreNickname(current);
             }
-        } else {
-            window.showToast(data.error || 'Ошибка обновления', 'error');
-            restoreNickname(current);
+            isSaving = false;
         }
-    } catch (err) {
-        console.error(err);
-        window.showToast('Ошибка соединения с сервером', 'error');
-        restoreNickname(current);
-    }
-    isSaving = false;
-}
 
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') { e.preventDefault(); save(); }
-                if (e.key === 'Escape') { restoreNickname(current); }
-            });
+        // ========== ОБРАБОТЧИК ДЛЯ КЛИКА ВНЕ ==========
+        const outsideClickHandler = (e) => {
+            const target = e.target;
+            if (input.contains(target) || editBtn.contains(target)) return;
+            save();
         };
+        document.addEventListener('click', outsideClickHandler);
 
-        editBtn._nickEditHandler = editHandler;
-        editBtn.addEventListener('click', editHandler);
-    }
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); save(); }
+            if (e.key === 'Escape') { restoreNickname(current); }
+        });
+    };
+
+    editBtn._nickEditHandler = editHandler;
+    editBtn.addEventListener('click', editHandler);
+}
 
     // ========== 3. АВАТАРКА (без изменений) ==========
     const avatarImg = document.getElementById('box-avatar');
