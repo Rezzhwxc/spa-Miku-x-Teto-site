@@ -1264,6 +1264,7 @@ function getPrevSongNoRepeat(availableSongs, currentId) {
 }
 
 
+const volumeIMG = document.getElementById('volumeBtn');
 const volumeSlider = document.getElementById('volumeSlider');
 if (volumeSlider) {
     volumeSlider.addEventListener('wheel', (e) => {
