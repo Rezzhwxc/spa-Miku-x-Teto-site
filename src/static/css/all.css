@@ -50,14 +50,12 @@ overflow-y: hidden;}
   animation: slideOutLeft 0.16s ease forwards;
 }
 
-.zagol {height: 154px; width: auto;
-    border: rgb(52, 52, 52) 2px solid; 
-    border-radius: 35px; margin-top: 16px; margin-left: 13px;
+.zagol {height: 154px; width: auto; opacity: 0.88;
+    border-radius: 35px; margin-top: 16px; margin-left: 53px;
     transition: all 0.3s;
     top:0%; -webkit-user-drag: none;
     }
-.zagol:hover{border-color: rgb(59, 59, 59);
-            scale: 1.03;}
+.zagol:hover{scale: 1.03; opacity: 0.95;}
 .zagol.collapsed{
     opacity: 0;
     z-index: -100;
@@ -68,14 +66,13 @@ overflow-y: hidden;}
     transition: all 0.3s ease; opacity: 0; z-index: -100;
     position: absolute; left: -100px;
     margin-top: 16px; margin-left: 6px;
-    height: 155px;
-    border: rgb(52, 52, 52) 2px solid; 
+    height: 135px;
     border-radius: 35px;
 }
-#zag-collaps:hover{border-color: rgb(59, 59, 59);}
+#zag-collaps:hover{opacity: 0.95}
 #zag-collaps.collapsed{
     transform: translateX(100px);
-    opacity: 1;
+    opacity: 0.88;
     z-index: 10;
 }
 
@@ -126,7 +123,7 @@ overflow-y: hidden;}
 /* навиг */
 .navig {
             color: #e6e3e3a4;
-            margin: 20px 0;
+            margin: 15px 0;
             padding: 10px;
             font-family: 'unbound';
         }
@@ -135,7 +132,7 @@ overflow-y: hidden;}
             background: none;
             color: inherit;
             text-decoration: none;
-            font-size: 20px;
+            font-size: 18px;
             transition: color 0.3s ease;
             display: inline;
             padding: 8px 0;
