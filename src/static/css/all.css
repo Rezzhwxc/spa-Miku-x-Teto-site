@@ -11,7 +11,16 @@ overflow-y: hidden;}
     100% { background-position: 0% 50%; }
 }
 
-
+@keyframes iconHeart {
+    0%, 100%{
+        opacity: 0.88;
+        scale: 1;
+    }
+    50%{
+        opacity: 1;
+        scale: 1.08;
+    }
+}
 
 /* анимация перехода */
 @keyframes fadeOut {
@@ -50,12 +59,13 @@ overflow-y: hidden;}
   animation: slideOutLeft 0.16s ease forwards;
 }
 
-.zagol {height: 154px; width: auto; opacity: 0.88;
-    border-radius: 35px; margin-top: 16px; margin-left: 53px;
+.zagol {height: 145px; opacity: 0.88;
+    border-radius: 35px; margin-top: 16px; margin-left: 66px;
     transition: all 0.3s;
     top:0%; -webkit-user-drag: none;
     }
-.zagol:hover{scale: 1.03; opacity: 0.95;}
+.zagol:hover{scale: 1.03; opacity: 0.95;
+    animation: iconHeart 0.8s infinite;}
 .zagol.collapsed{
     opacity: 0;
     z-index: -100;
@@ -65,9 +75,8 @@ overflow-y: hidden;}
 #zag-collaps{
     transition: all 0.3s ease; opacity: 0; z-index: -100;
     position: absolute; left: -100px;
-    margin-top: 16px; margin-left: 6px;
-    height: 135px;
-    border-radius: 35px;
+    margin-top: 16px; margin-left: 9px;
+    height: 120px;
 }
 #zag-collaps:hover{opacity: 0.95}
 #zag-collaps.collapsed{
@@ -78,7 +87,7 @@ overflow-y: hidden;}
 
  /*SIDEBAR ПОЛЕ*/ 
 .sidebar{
-    width: 278px; height: 800px;
+    width: 278px; height: fit-content;
     transition: transform 0.3s ease-in-out;
 }
 
