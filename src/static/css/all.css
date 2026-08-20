@@ -1,6 +1,7 @@
 body {background-color: rgb(26, 26, 26);
 overflow-y: hidden;}
 
+
 @font-face {
   font-family: 'Unbound';
   src: url(/static/fonts/Unbounded-Regular.ttf) format('truetype');
